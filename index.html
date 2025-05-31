@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ft_transcendence</title>
+
+    <!-- Tailwind CSS – CDN “browser” build -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+
+  <body
+    class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600 text-white selection:bg-pink-400/40"
+  >
+    <!-- ░░ NAVBAR ░░ -->
+    <header class="sticky top-0 bg-black/50 backdrop-blur-md z-50">
+      <nav
+        class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16"
+      >
+        <a href="#" class="text-3xl font-extrabold">⚡ ft_transcendence</a>
+
+        <button id="burger" class="sm:hidden text-white">
+          <!-- hamburger icon -->
+          <svg
+            class="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <ul id="nav-menu" class="hidden sm:flex space-x-8">
+          <li><a href="#" class="hover:text-pink-200">Home</a></li>
+          <li><a href="#" class="hover:text-pink-200">Play</a></li>
+          <li><a href="#" class="hover:text-pink-200">Profile</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- ░░ GAME AREA ░░ -->
+    <main class="flex-grow flex items-center justify-center p-8">
+      <div
+        id="game-container"
+        class="relative w-full max-w-xl aspect-video bg-gray-900/70 rounded-3xl shadow-2xl overflow-hidden"
+      >
+        <canvas id="pong-canvas" class="w-full h-full rounded-3xl"></canvas>
+
+        <!-- SCOREBOARD -->
+        <div
+          id="scoreboard"
+          class="absolute top-4 left-1/2 -translate-x-1/2 text-4xl font-extrabold flex gap-3 drop-shadow-[0_0_8px_rgb(0_0_0/0.9)] select-none z-10"
+        >
+          <span id="score-left" class="text-cyan-300">0</span>
+          <span>:</span>
+          <span id="score-right" class="text-amber-300">0</span>
+        </div>
+
+        <!-- START OVERLAY -->
+        <button
+          id="start-btn"
+          class="absolute inset-0 flex items-center justify-center z-20 bg-black/40 backdrop-blur-sm text-3xl md:text-5xl font-extrabold tracking-wide text-white hover:scale-105 transition before:absolute before:inset-0 before:-z-10 before:rounded-3xl before:bg-[conic-gradient(at_top_left,_theme(colors.cyan.400),_theme(colors.fuchsia.500),_theme(colors.amber.400))] before:opacity-40 before:blur-2xl"
+        >
+          ▶ LET&nbsp;THE&nbsp;GAME&nbsp;BEGIN
+        </button>
+      </div>
+    </main>
+
+    <!-- compiled scripts -->
+    <script type="module" src="./dist/nav.js"></script>
+    <script type="module" src="./dist/main.js"></script>
+  </body>
+</html>
