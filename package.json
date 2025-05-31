@@ -6,8 +6,7 @@
     "start": "concurrently \"tsc --watch\" \"live-server\""
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "live-server": "^1.2.2",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "typescript": "^5.8.3"
   }
 }
