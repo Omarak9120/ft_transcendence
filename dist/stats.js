@@ -105,28 +105,38 @@ function drawLifePie() {
     });
 }
 /* ───────────────────────────────────────────────────────── */
-/* 3) Trophy cabinet (demo data)                             */
+/* 3) Trophy total – fetched directly from backend           */
 /* ───────────────────────────────────────────────────────── */
-function renderTrophies() {
-    const trophies = [
-        { icon: "🥇", title: "First Blood", desc: "Won your very first game" },
-        { icon: "🔥", title: "Hot Streak", desc: "5 wins in a row" },
-        { icon: "🏆", title: "Centurion", desc: "Played 100 games" }
-    ];
+const TROPHY_API = "/api/users/me/trophies"; // ← change path if needed
+const MOCK_TOTAL = 420; // demo number for mock mode
+async function renderTrophies() {
+    var _a;
     const box = document.getElementById("trophies");
-    box.innerHTML = ""; // clear if re-rendered
-    trophies.forEach(t => {
-        const card = document.createElement("div");
-        card.className =
-            "flex gap-4 items-start p-4 rounded-xl bg-white/10 backdrop-blur " +
-                "border border-white/20";
-        card.innerHTML = `
-      <span class="text-3xl">${t.icon}</span>
-      <div>
-        <h4 class="font-semibold mb-1">${t.title}</h4>
-        <p class="text-sm text-white/70 leading-snug">${t.desc}</p>
-      </div>
-    `;
-        box.appendChild(card);
-    });
+    box.innerHTML = ""; // clear previous content
+    /* — get total trophies — */
+    let total = MOCK_TOTAL;
+    if (!USE_MOCK_DATA) {
+        try {
+            const res = await fetch(TROPHY_API, { credentials: "include" });
+            if (!res.ok)
+                throw new Error(`HTTP ${res.status}`);
+            const json = (await res.json());
+            total = (_a = json.total) !== null && _a !== void 0 ? _a : 0;
+        }
+        catch (err) {
+            console.warn("trophy fetch failed – showing 0", err);
+            total = 0;
+        }
+    }
+    /* — render pretty single card — */
+    const card = document.createElement("div");
+    card.className =
+        "flex flex-col items-center justify-center gap-2 p-6 " +
+            "rounded-2xl bg-white/10 backdrop-blur border border-white/20";
+    card.innerHTML = `
+    <span class="text-6xl">🏆</span>
+    <span class="text-4xl font-extrabold">${total}</span>
+    <p class="text-sm text-white/70">Total trophies</p>
+  `;
+    box.appendChild(card);
 }

@@ -7,27 +7,44 @@
 
     <!-- Chart.js for the graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Tailwind CSS “browser” build -->
+    <!-- Tailwind CSS – CDN “browser” build -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- ───────────── Sleek scrollbars (fuchsia main, amber inner) -->
+    <style>
+      /* Main scroll area in the profile page */
+      #tab-panels::-webkit-scrollbar           { width: 10px; }
+      #tab-panels::-webkit-scrollbar-track     { background: rgba(255,255,255,0.07);
+                                                 border-radius: 10px; }
+      #tab-panels::-webkit-scrollbar-thumb     { background: rgba(232,  60, 140, 0.85); /* fuchsia-500 */
+                                                 border-radius: 10px; }
+      #tab-panels:hover::-webkit-scrollbar-thumb { background: rgba(232, 60, 140, 1); }
+      #tab-panels                               { scrollbar-width: thin;
+                                                  scrollbar-color: rgba(232,60,140,0.9)
+                                                                   rgba(255,255,255,0.07); }
+
+      /* Amber variant for anything with .custom-scroll */
+      .custom-scroll::-webkit-scrollbar        { width: 8px; }
+      .custom-scroll::-webkit-scrollbar-track  { background: transparent; }
+      .custom-scroll::-webkit-scrollbar-thumb  { background: rgba(251,191,36,0.9); /* amber-400 */
+                                                 border-radius: 8px; }
+      .custom-scroll:hover::-webkit-scrollbar-thumb { background: rgba(253,224,71,1); /* amber-300 */ }
+      .custom-scroll                           { scrollbar-width: thin;
+                                                 scrollbar-color: rgba(251,191,36,0.9) transparent; }
+    </style>
   </head>
 
-  <body
-    class="min-h-screen flex flex-col
-           bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600
-           text-white selection:bg-pink-400/40"
-  >
+  <body class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600 text-white selection:bg-pink-400/40">
     <!-- ░░ NAVBAR ░░ -->
     <header class="sticky top-0 bg-black/50 backdrop-blur-md z-50">
       <nav class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16">
         <a href="#" class="text-3xl font-extrabold">⚡ ft_transcendence</a>
-
         <button id="burger" class="sm:hidden text-white">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"
                viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-
         <ul id="nav-menu" class="hidden sm:flex space-x-8">
           <li><a href="#" class="hover:text-pink-200">Home</a></li>
           <li><a href="#" class="hover:text-pink-200">Play</a></li>
@@ -36,7 +53,7 @@
       </nav>
     </header>
 
-    <!-- ░░ GAME AREA (unchanged) ░░ -->
+    <!-- ░░ GAME AREA ░░ -->
     <main class="flex-grow flex items-center justify-center p-8">
       <div id="game-container"
            class="relative w-full max-w-xl aspect-video bg-gray-900/70 rounded-3xl
@@ -68,9 +85,8 @@
 
     <!-- ░░ PROFILE MINI-PAGE ░░ -->
     <div id="profile-overlay"
-     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center
-            justify-center z-[60]
-            hidden opacity-0 transition-opacity duration-300">
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center
+                justify-center z-[60] hidden opacity-0 transition-opacity duration-300">
       <div
         class="relative w-full max-w-3xl h-[90vh]
                bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600
@@ -87,13 +103,13 @@
 
         <!-- header -->
         <div class="flex items-center gap-6 mb-8">
-          <!-- avatar -->
-          <div class="group relative w-24 h-24 rounded-full p-[3px]
+          <div
+            class="group relative w-24 h-24 rounded-full p-[3px]
                       bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-amber-400 shrink-0">
             <img id="avatar-img"
                  src="https://i.pravatar.cc/150?u=user"
-                 class="w-full h-full object-cover rounded-full"
-                 alt="Profile picture" />
+                 alt="Profile picture"
+                 class="w-full h-full object-cover rounded-full" />
             <label for="avatar-input"
               class="absolute inset-0 rounded-full bg-black/50 flex
                      items-center justify-center opacity-0 group-hover:opacity-100
@@ -102,22 +118,22 @@
               <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor"
                     stroke-width="2" viewBox="0 0 24 24"
                     stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 7h4l2-3h6l2 3h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
+                <path
+                  d="M3 7h4l2-3h6l2 3h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
                 <circle cx="12" cy="13" r="4"/>
               </svg>
             </label>
             <input type="file" id="avatar-input" accept="image/*" class="hidden" />
           </div>
-
           <div>
             <h2 class="text-3xl font-bold">Mohammad Ali</h2>
-            <p  class="text-sm text-white/70">Player since 2025</p>
+            <p class="text-sm text-white/70">Player since 2025</p>
           </div>
         </div>
 
         <!-- TAB BAR -->
         <nav id="profile-tabs"
-             class="relative flex space-x-8 border-b border-white/30 text-white/70">
+             class="relative flex space-x-8 border-b border-white/30 text-white/70 overflow-x-auto">
           <button type="button" data-tab="info"
                   class="tab-btn pb-2 cursor-pointer text-white">Info</button>
           <button type="button" data-tab="stats"
@@ -126,7 +142,6 @@
                   class="tab-btn pb-2 cursor-pointer">History</button>
           <button type="button" data-tab="friends"
                   class="tab-btn pb-2 cursor-pointer">Friends</button>
-
           <!-- sliding underline -->
           <span id="tab-underline"
                 class="absolute bottom-0 h-0.5 bg-amber-400
@@ -135,75 +150,66 @@
 
         <!-- TAB PANELS -->
         <div id="tab-panels" class="flex-1 overflow-y-auto pt-6">
+
           <!-- INFO -->
           <section data-panel="info" class="panel">
             <h3 class="text-xl font-semibold mb-4">About Me</h3>
-            <p class="leading-relaxed">
-              Just a placeholder bio. Replace this with real data from your
-              backend – country, favourite paddle colour, anything you like.
-            </p>
+            <p>Replace this with real data from your backend.</p>
           </section>
 
-          <!-- STATS PANEL with charts + trophies -->
-          <section data-panel="stats" class="panel hidden">
-            <!-- ① Monthly average wins -->
-            <h3 class="text-xl font-semibold mb-4">Monthly average winning games</h3>
+          <!-- STATS -->
+          <section data-panel="stats" class="panel hidden custom-scroll">
+            <h3 class="text-xl font-semibold mb-4">
+              Monthly average winning games
+            </h3>
             <canvas id="monthly-chart" class="max-w-full mb-8"></canvas>
 
-            <!-- ② Life average wins -->
-            <h3 class="text-xl font-semibold mb-4">Life average winning games</h3>
+            <h3 class="text-xl font-semibold mb-4">
+              Life average winning games
+            </h3>
             <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
-            <!-- ③ Trophy cabinet -->
             <h3 class="text-xl font-semibold mb-4">Trophies</h3>
             <div id="trophies"
                  class="grid sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
           </section>
-          
+
           <!-- HISTORY -->
           <section data-panel="history" class="panel hidden">
             <h3 class="text-xl font-semibold mb-4">Recent Games</h3>
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-left text-white/70 border-b border-white/30">
-                  <th class="py-2">Match&nbsp;ID</th>
-                  <th class="py-2">Date</th>
-                  <th class="py-2">Opponent</th>
-                  <th class="py-2">Score</th>
-                  <th class="py-2">Result</th>
-                </tr>
-              </thead>
-              <!-- ▼ JS will fill this -->
-              <tbody id="history-body"></tbody>
-            </table>
+            <div class="overflow-y-auto max-h custom-scroll">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-left text-white/70 border-b border-white/30">
+                    <th class="py-2">Match&nbsp;ID</th>
+                    <th class="py-2">Date</th>
+                    <th class="py-2">Opponent</th>
+                    <th class="py-2">Score</th>
+                    <th class="py-2">Result</th>
+                  </tr>
+                </thead>
+                <tbody id="history-body"></tbody>
+              </table>
+            </div>
           </section>
 
-
-          <!-- FRIENDS --> 
+          <!-- FRIENDS -->
           <section data-panel="friends" class="panel hidden">
             <h3 class="text-xl font-semibold mb-4">Friends</h3>
             <ul class="space-y-4">
               <li class="flex items-center gap-4">
-                <img
-                  src="https://i.pravatar.cc/40?u=a"
-                  class="w-10 h-10 rounded-full"
-                />
+                <img src="https://i.pravatar.cc/40?u=a"
+                     class="w-10 h-10 rounded-full" />
                 <span class="flex-1">Aya</span>
-                <button
-                  class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white"
-                >
+                <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
                   Challenge
                 </button>
               </li>
               <li class="flex items-center gap-4">
-                <img
-                  src="https://i.pravatar.cc/40?u=b"
-                  class="w-10 h-10 rounded-full"
-                />
+                <img src="https://i.pravatar.cc/40?u=b"
+                     class="w-10 h-10 rounded-full" />
                 <span class="flex-1">Karim</span>
-                <button
-                  class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white"
-                >
+                <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
                   Challenge
                 </button>
               </li>
