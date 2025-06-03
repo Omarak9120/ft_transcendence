@@ -158,21 +158,40 @@
           </section>
 
           <!-- STATS -->
-          <section data-panel="stats" class="panel hidden custom-scroll">
-            <h3 class="text-xl font-semibold mb-4">
-              Monthly average winning games
-            </h3>
-            <canvas id="monthly-chart" class="max-w-full mb-8"></canvas>
+        <section data-panel="stats" class="panel hidden custom-scroll">
+          <!-- Monthly wins (already there) -->
+          <h3 class="text-xl font-semibold mb-4">Monthly average winning games</h3>
+          <canvas id="monthly-chart" class="max-w-full mb-8"></canvas>
 
-            <h3 class="text-xl font-semibold mb-4">
-              Life average winning games
-            </h3>
-            <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
+          <!-- Life pie (already there) -->
+          <h3 class="text-xl font-semibold mb-4">Life average winning games</h3>
+          <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
-            <h3 class="text-xl font-semibold mb-4">Trophies</h3>
-            <div id="trophies"
-                 class="grid sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-          </section>
+          <!-- NEW ↓ goals pie -->
+          <h3 class="text-xl font-semibold mb-4">Goals scored vs conceded</h3>
+          <canvas id="goals-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
+
+          <!-- NEW ↓ paddle hits -->
+          <h3 class="text-xl font-semibold mb-4">Monthly goals scored vs conceded</h3>
+          <canvas id="hits-chart" class="max-w-full mb-8"></canvas>
+
+          <!-- NEW ↓ longest paddle-hit -->
+          <h3 class="text-xl font-semibold mb-2">Longest paddle-hit (single match)</h3>
+          <div id="longest-hit-card"
+              class="flex flex-col items-center justify-center gap-1 p-4 mb-8
+                      rounded-xl bg-white/10 backdrop-blur border border-white/20">
+            <span class="text-4xl font-extrabold">0</span>
+            <p class="text-xs text-white/70">consecutive hits</p>
+            <!-- new line for opponent -->
+            <p id="longest-opponent" class="text-xs text-white/50">vs ­—</p>
+          </div>
+
+
+          <!-- Trophy total card (unchanged) -->
+          <h3 class="text-xl font-semibold mb-4">Trophies</h3>
+          <div id="trophies"></div>
+        </section>
+
 
           <!-- HISTORY -->
           <section data-panel="history" class="panel hidden">
