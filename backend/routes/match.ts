@@ -2,6 +2,56 @@ import { FastifyInstance } from 'fastify';
 import db from '../utils/db';
 
 export default async function matchRoutes(fastify: FastifyInstance) {
+  
+  //START MATCH (new)
+  fastify.post('/match/start', async (req, reply) => {
+    const {
+      player1_id,
+      player2_id,
+      tournament_id
+    } = req.body as {
+      player1_id: number;
+      player2_id: number;
+      tournament_id?: number;
+    };
+    
+    const isPlayer1InMatch = db.prepare(`
+      SELECT id FROM matches
+      WHERE (player1_id = ? OR player2_id = ?) AND winner_id IS NULL
+      `).get(player1_id, player1_id);
+      
+      const isPlayer2InMatch = db.prepare(`
+    SELECT id FROM matches
+    WHERE (player1_id = ? OR player2_id = ?) AND winner_id IS NULL
+    `).get(player2_id, player2_id);
+    
+    if (isPlayer1InMatch || isPlayer2InMatch) {
+    return reply.status(400).send({ error: 'One or both players are already in an active match' });
+    }
+    // Validate input
+    if (!player1_id || !player2_id) {
+      return reply.status(400).send({ error: 'Both player IDs are required' });
+    }
+    
+    try {
+      const stmt = db.prepare(`
+        INSERT INTO matches (player1_id, player2_id, tournament_id)
+        VALUES (?, ?, ?)
+        `);
+        const result = stmt.run(player1_id, player2_id, tournament_id ?? null);
+        
+        return reply.send({
+          message: 'Match started',
+          match_id: result.lastInsertRowid
+        });
+      } catch (err) {
+      console.error(err);
+      return reply.status(500).send({ error: 'Failed to start match' });
+    }
+  });
+
+
+  //END MATCH
   fastify.post('/match/submit', async (req, reply) => {
     const {
       match_id,
@@ -64,50 +114,44 @@ export default async function matchRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // ✅ START MATCH (new)
-  fastify.post('/match/start', async (req, reply) => {
-    const {
-      player1_id,
-      player2_id,
-      tournament_id
-    } = req.body as {
-      player1_id: number;
-      player2_id: number;
-      tournament_id?: number;
+  //for history
+  fastify.get('/api/matches/history', async (req, reply) => {
+  const userId = 2; // Replace this later with real session logic
+
+  const rows = db.prepare(`
+    SELECT
+      m.id,
+      m.played_at,
+      u.username AS opponent,
+      m.player1_id, m.player2_id,
+      m.score_p1, m.score_p2,
+      m.winner_id
+    FROM matches m
+    JOIN users u ON
+      (u.id = CASE
+         WHEN m.player1_id = ? THEN m.player2_id
+         ELSE m.player1_id
+       END)
+    WHERE (m.player1_id = ? OR m.player2_id = ?)
+      AND m.winner_id IS NOT NULL
+    ORDER BY m.played_at DESC
+  `).all(userId, userId, userId);
+
+  const history = rows.map((match: any) => {
+    const isPlayer1 = match.player1_id === userId;
+    const userScore = isPlayer1 ? match.score_p1 : match.score_p2;
+    const opponentScore = isPlayer1 ? match.score_p2 : match.score_p1;
+
+    return {
+      id: String(match.id).padStart(3, '0'),
+      date: match.played_at.split('T')[0],
+      opponent: match.opponent,
+      score: `${userScore} – ${opponentScore}`,
+      result: match.winner_id === userId ? "Win" : "Loss"
     };
-
-    const isPlayer1InMatch = db.prepare(`
-    SELECT id FROM matches
-    WHERE (player1_id = ? OR player2_id = ?) AND winner_id IS NULL
-    `).get(player1_id, player1_id);
-
-    const isPlayer2InMatch = db.prepare(`
-    SELECT id FROM matches
-    WHERE (player1_id = ? OR player2_id = ?) AND winner_id IS NULL
-    `).get(player2_id, player2_id);
-
-    if (isPlayer1InMatch || isPlayer2InMatch) {
-    return reply.status(400).send({ error: 'One or both players are already in an active match' });
-    }
-    // Validate input
-    if (!player1_id || !player2_id) {
-      return reply.status(400).send({ error: 'Both player IDs are required' });
-    }
-
-    try {
-      const stmt = db.prepare(`
-        INSERT INTO matches (player1_id, player2_id, tournament_id)
-        VALUES (?, ?, ?)
-      `);
-      const result = stmt.run(player1_id, player2_id, tournament_id ?? null);
-
-      return reply.send({
-        message: 'Match started',
-        match_id: result.lastInsertRowid
-      });
-    } catch (err) {
-      console.error(err);
-      return reply.status(500).send({ error: 'Failed to start match' });
-    }
   });
+
+  return reply.send(history);
+});
+
 }
