@@ -1,80 +1,76 @@
 /**
- * src/stats.ts  – Stats panel logic
- * (Chart.js is loaded globally via CDN in index.html)
+ * stats.ts – all graphs & cards in the Stats tab
+ * 100 % strict-mode types
  */
-/* ═════════ 0) Mock / live switch ═════════ */
-const USE_MOCK_DATA = true; // flip to false with live backend
-/* ═════════ 1) Endpoints ═════════ */
-const API_WINS_MONTH = "/api/stats/monthly-wins";
-const API_WINS_TOTAL = "/api/stats/wins"; // NEW ← life wins vs losses
-const API_GOALS_TOTAL = "/api/stats/goals";
-const API_GOALS_MONTH = "/api/stats/monthly-goals";
-const API_STREAK = "/api/stats/win-streak";
-const API_LONGEST = "/api/stats/longest-hit";
-const API_TROPHY = "/api/users/me/trophies";
-/* ═════════ 2) Mock data ═════════ */
-const MOCK_WINS_MONTH = [14, 7, 9, 11, 13, 8, 10, 12, 6, 9, 15, 11];
-const MOCK_WINS_TOTAL = { wins: 69, losses: 31 }; // NEW
-const MOCK_GOALS_TOTAL = { scored: 120, conceded: 95 };
-const MOCK_GOALS_MONTH = {
-    scored: [10, 9, 8, 12, 11, 10, 13, 12, 9, 8, 15, 13],
-    conceded: [7, 8, 6, 9, 8, 7, 9, 10, 7, 6, 11, 10]
+/* ───── mock toggle ───── */
+const USE_MOCK_DATA = true;
+/* ───── endpoints ───── */
+const ENDPOINT = {
+    winsMonth: "/api/stats/monthly-wins",
+    winsTotal: "/api/stats/wins",
+    goalsTotal: "/api/stats/goals",
+    goalsMonth: "/api/stats/monthly-goals",
+    streak: "/api/stats/win-streak",
+    longest: "/api/stats/longest-hit",
+    trophy: "/api/users/me/trophies"
 };
-const MOCK_STREAK = 7;
-const MOCK_LONGEST = { longest: 37, opponent: "Karim" };
-const MOCK_TROPHIES = 420;
-/* ═════════ 3) Init guard ═════════ */
+/* ───── mock payloads ───── */
+const MOCK = {
+    winsMonth: [14, 7, 9, 11, 13, 8, 10, 12, 6, 9, 15, 11],
+    winsTotal: { wins: 69, losses: 31 },
+    goalsTotal: { scored: 120, conceded: 95 },
+    goalsMonth: {
+        scored: [10, 9, 8, 12, 11, 10, 13, 12, 9, 8, 15, 13],
+        conceded: [7, 8, 6, 9, 8, 7, 9, 10, 7, 6, 11, 10]
+    },
+    streak: { streak: 7 },
+    longest: { longest: 37, opponent: "Karim" },
+    trophy: { total: 420 }
+};
+/* ───── init guard ───── */
 let loaded = false;
 export function initStatsTab() {
     if (loaded)
         return;
     loaded = true;
     drawMonthlyWins();
-    drawLifePie(); // now API-driven
+    drawLifePie();
     drawGoalsPie();
     drawMonthlyGoalsBars();
     renderStreak();
     renderLongestHit();
     renderTrophies();
 }
-/* ═════════ helpers ═════════ */
-function last12MonthLabels(d = new Date()) {
-    const fmt = { month: "short", year: "numeric" };
-    return Array.from({ length: 12 }, (_, i) => {
-        const dt = new Date(d.getFullYear(), d.getMonth() - 11 + i, 1);
-        return dt.toLocaleString("en-US", fmt);
-    });
+function last12Labels(d = new Date()) {
+    return Array.from({ length: 12 }, (_, i) => new Date(d.getFullYear(), d.getMonth() - 11 + i, 1)
+        .toLocaleString("en-US", { month: "short", year: "numeric" }));
 }
-async function fetchNums(url, n) {
-    try {
-        const r = await fetch(url, { credentials: "include" });
-        const a = (await r.json());
-        return Array.isArray(a) && a.length === n ? a : Array(n).fill(0);
-    }
-    catch (_a) {
-        return Array(n).fill(0);
-    }
+async function fetchJSON(url) {
+    const r = await fetch(url, { credentials: "include" });
+    if (!r.ok)
+        throw new Error(String(r.status));
+    return r.json();
 }
-/* ═════════ 4-a) Monthly wins bar ═════════ */
+/* ═════════ 1) Monthly wins bar ════════ */
 async function drawMonthlyWins() {
-    const labels = last12MonthLabels();
-    const data = USE_MOCK_DATA ? MOCK_WINS_MONTH
-        : await fetchNums(API_WINS_MONTH, labels.length);
+    const labels = last12Labels();
+    const data = USE_MOCK_DATA
+        ? MOCK.winsMonth
+        : await fetchJSON(ENDPOINT.winsMonth).catch(() => labels.map(() => 0));
     new Chart(document.getElementById("monthly-chart"), { type: "bar",
         data: { labels,
             datasets: [{ label: "Avg wins", data,
                     backgroundColor: "rgba(252,211,77,0.9)" }] },
         options: { plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { color: "#fff" } },
-                x: { ticks: { color: "#fff" } } } } });
+                x: { ticks: { color: "#fff" } } } }
+    });
 }
-/* ═════════ 4-b) Life wins vs losses pie  (API) ═════════ */
+/* ═════════ 2) Life wins vs losses pie ════════ */
 async function drawLifePie() {
     const t = USE_MOCK_DATA
-        ? MOCK_WINS_TOTAL
-        : await fetch(API_WINS_TOTAL, { credentials: "include" })
-            .then(r => r.json())
-            .catch(() => ({ wins: 0, losses: 0 }));
+        ? MOCK.winsTotal
+        : await fetchJSON(ENDPOINT.winsTotal).catch(() => ({ wins: 0, losses: 0 }));
     new Chart(document.getElementById("life-chart"), { type: "pie",
         data: { labels: ["Wins", "Losses"],
             datasets: [{ data: [t.wins, t.losses],
@@ -82,11 +78,11 @@ async function drawLifePie() {
         options: { plugins: { legend: { labels: { color: "#fff", boxWidth: 10 } } } }
     });
 }
-/* ═════════ 4-c) Goals pie (total) ═════════ */
+/* ═════════ 3) Total goals pie ════════ */
 async function drawGoalsPie() {
-    const g = USE_MOCK_DATA ? MOCK_GOALS_TOTAL
-        : await fetch(API_GOALS_TOTAL, { credentials: "include" })
-            .then(r => r.json()).catch(() => ({ scored: 0, conceded: 0 }));
+    const g = USE_MOCK_DATA
+        ? MOCK.goalsTotal
+        : await fetchJSON(ENDPOINT.goalsTotal).catch(() => ({ scored: 0, conceded: 0 }));
     new Chart(document.getElementById("goals-chart"), { type: "pie",
         data: { labels: ["Scored", "Conceded"],
             datasets: [{ data: [g.scored, g.conceded],
@@ -94,19 +90,19 @@ async function drawGoalsPie() {
         options: { plugins: { legend: { labels: { color: "#fff", boxWidth: 10 } } } }
     });
 }
-/* ═════════ 4-d) Monthly goals grouped bars ═════════ */
+/* ═════════ 4) Monthly goals grouped bars ════════ */
 async function drawMonthlyGoalsBars() {
-    const labels = last12MonthLabels();
-    const d = USE_MOCK_DATA ? MOCK_GOALS_MONTH
-        : await fetch(API_GOALS_MONTH, { credentials: "include" })
-            .then(r => r.json())
+    const labels = last12Labels();
+    const m = USE_MOCK_DATA
+        ? MOCK.goalsMonth
+        : await fetchJSON(ENDPOINT.goalsMonth)
             .catch(() => ({ scored: Array(12).fill(0), conceded: Array(12).fill(0) }));
     new Chart(document.getElementById("hits-chart"), { type: "bar",
         data: { labels,
             datasets: [
-                { label: "Scored", data: d.scored,
+                { label: "Scored", data: m.scored,
                     backgroundColor: "rgba(34,211,238,0.9)" },
-                { label: "Conceded", data: d.conceded,
+                { label: "Conceded", data: m.conceded,
                     backgroundColor: "rgba(248,113,113,0.9)" }
             ] },
         options: { plugins: { legend: { labels: { color: "#fff" } } },
@@ -114,34 +110,35 @@ async function drawMonthlyGoalsBars() {
                 x: { ticks: { color: "#fff" } } } }
     });
 }
-/* ═════════ 5-a) Win-streak card ═════════ */
+/* ═════════ 5) Cards ════════ */
+function setCardText(sel, txt) {
+    document.querySelector(sel).textContent = txt;
+}
+/* 5-a win streak */
 async function renderStreak() {
-    const s = USE_MOCK_DATA ? MOCK_STREAK
-        : await fetch(API_STREAK, { credentials: "include" })
-            .then(r => r.json()).then(j => { var _a; return (_a = j.streak) !== null && _a !== void 0 ? _a : 0; }).catch(() => 0);
-    document.querySelector("#streak-card span").textContent =
-        String(s);
+    const s = USE_MOCK_DATA
+        ? MOCK.streak.streak
+        : await fetchJSON(ENDPOINT.streak).then(d => d.streak).catch(() => 0);
+    setCardText("#streak-card span", String(s));
 }
+/* 5-b longest hit */
 async function renderLongestHit() {
-    var _a;
-    const d = USE_MOCK_DATA ? MOCK_LONGEST
-        : await fetch(API_LONGEST, { credentials: "include" })
-            .then(r => r.json()).catch(() => ({ longest: 0, opponent: "—" }));
-    document.querySelector("#longest-hit-card span").textContent =
-        String(d.longest);
-    document.getElementById("longest-opponent").textContent =
-        `vs ${(_a = d.opponent) !== null && _a !== void 0 ? _a : "—"}`;
+    const d = USE_MOCK_DATA
+        ? MOCK.longest
+        : await fetchJSON(ENDPOINT.longest).catch(() => ({ longest: 0, opponent: "—" }));
+    setCardText("#longest-hit-card span", String(d.longest));
+    setCardText("#longest-opponent", `vs ${d.opponent}`);
 }
-/* ═════════ 5-c) Trophy total card ═════════ */
+/* 5-c trophies */
 async function renderTrophies() {
-    const total = USE_MOCK_DATA ? MOCK_TROPHIES
-        : await fetch(API_TROPHY, { credentials: "include" })
-            .then(r => r.json()).then(j => { var _a; return (_a = j.total) !== null && _a !== void 0 ? _a : 0; }).catch(() => 0);
+    const t = USE_MOCK_DATA
+        ? MOCK.trophy.total
+        : await fetchJSON(ENDPOINT.trophy).then(d => d.total).catch(() => 0);
     document.getElementById("trophies").innerHTML = `
     <div class="flex flex-col items-center justify-center gap-2 p-6
                 rounded-2xl bg-white/10 backdrop-blur border border-white/20">
       <span class="text-6xl">🏆</span>
-      <span class="text-4xl font-extrabold">${total}</span>
+      <span class="text-4xl font-extrabold">${t}</span>
       <p class="text-sm text-white/70">Total trophies</p>
     </div>`;
 }

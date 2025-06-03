@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Tailwind CSS – CDN “browser” build -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
 
     <!-- ───────────── Sleek scrollbars (fuchsia main, amber inner) -->
     <style>
@@ -46,9 +47,9 @@
           </svg>
         </button>
         <ul id="nav-menu" class="hidden sm:flex space-x-8">
-          <li><a href="#" class="hover:text-pink-200">Home</a></li>
-          <li><a href="#" class="hover:text-pink-200">Play</a></li>
-          <li><a href="#" id="nav-profile" class="hover:text-pink-200">Profile</a></li>
+        <li><a href="#" class="hover:text-pink-200">Home</a></li>
+        <li><a href="#" id="nav-play" class="hover:text-pink-200">Play</a></li> <!-- keep this -->
+        <li><a href="#" id="nav-profile" class="hover:text-pink-200">Profile</a></li>
         </ul>
       </nav>
     </header>
@@ -237,6 +238,70 @@
         </div>
       </div>
     </div>
+
+    <!-- ░░ PLAY POP-UP ░░ -->
+    <div id="play-overlay"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center
+                justify-center z-[60] hidden opacity-0 transition-opacity duration-300">
+      <div class="relative w-full max-w-3xl p-10 rounded-3xl shadow-2xl
+                  bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700
+                  text-white flex flex-col gap-8">
+        <!-- close × -->
+        <button id="play-close"
+                class="absolute top-4 right-4 text-white/70 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <header class="text-center">
+          <h2 class="text-3xl font-bold mb-1">Choose a mode</h2>
+          <p class="text-sm text-white/70">Pick how you want to play</p>
+        </header>
+
+        <!-- 2 × 2 grid of mode cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- vs AI -->
+          <button data-mode="ai"
+                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
+                        bg-white/10 hover:bg-white/15 transition">
+            <span class="text-5xl">🤖</span>
+            <span class="text-lg font-semibold">Vs&nbsp;AI</span>
+            <p class="text-xs text-white/70 text-center">Practice against the computer</p>
+          </button>
+
+          <!-- offline 1-on-1 -->
+          <button data-mode="offline"
+                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
+                        bg-white/10 hover:bg-white/15 transition">
+            <span class="text-5xl">🎮</span>
+            <span class="text-lg font-semibold">1&nbsp;v&nbsp;1&nbsp;(offline)</span>
+            <p class="text-xs text-white/70 text-center">Two players on the same device</p>
+          </button>
+
+          <!-- remote -->
+          <button data-mode="remote"
+                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
+                        bg-white/10 hover:bg-white/15 transition">
+            <span class="text-5xl">🌐</span>
+            <span class="text-lg font-semibold">Remote&nbsp;Play</span>
+            <p class="text-xs text-white/70 text-center">Invite a friend or join matchmaking</p>
+          </button>
+
+          <!-- tournament -->
+          <button data-mode="tournament"
+                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
+                        bg-white/10 hover:bg-white/15 transition">
+            <span class="text-5xl">🏆</span>
+            <span class="text-lg font-semibold">Tournament</span>
+            <p class="text-xs text-white/70 text-center">Bracket-style knockout fun</p>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
 
     <!-- compiled scripts -->
     <script type="module" src="./dist/nav.js"></script>
