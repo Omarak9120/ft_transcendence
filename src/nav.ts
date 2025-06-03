@@ -1,116 +1,93 @@
 /**
- * nav.ts
- * ─────────────────────────────────────────────────────────
- * ▸ mobile burger toggle
- * ▸ profile overlay (fade-in / fade-out)
- * ▸ avatar upload preview
- * ▸ tab switcher with sliding underline
- * ▸ lazy-initialises:
- *      – Stats charts / trophies  (first time “Stats”)
- *      – History table rows       (first time “History”)
+ * nav.ts – SPA navbar & overlays
+ * Strict-mode TypeScript
  */
 
 import { initStatsTab }   from "./stats.js";
 import { initHistoryTab } from "./history.js";
 
-/* ─────────────────────────────────────────────────────────
-   Burger menu (small screens)
-   ───────────────────────────────────────────────────────── */
-const burger = document.getElementById("burger");
-const menu   = document.getElementById("nav-menu");
+/* Typed querySelector helper */
+const $ = <T extends HTMLElement = HTMLElement>(sel: string) =>
+  document.querySelector<T>(sel);
 
-burger?.addEventListener("click", () => menu?.classList.toggle("hidden"));
-
-/* ─────────────────────────────────────────────────────────
-   Profile overlay – fade-in / fade-out
-   ───────────────────────────────────────────────────────── */
-const profileLink    = document.getElementById("nav-profile");
-const profileOverlay = document.getElementById("profile-overlay");
-const profileClose   = document.getElementById("profile-close");
-
-function openProfile(e?: Event) {
-  e?.preventDefault();
-
-  if (!profileOverlay) return;
-
-  // 1) show (still transparent)
-  profileOverlay.classList.remove("hidden");
-
-  // 2) next paint → remove opacity-0 to fade in
-  requestAnimationFrame(() => profileOverlay.classList.remove("opacity-0"));
-
-  // underline under active tab
-  const activeBtn = document.querySelector<HTMLButtonElement>(
-    "#profile-tabs .tab-btn.text-white"
-  );
-  if (activeBtn) moveUnderline(activeBtn);
-}
-
-function closeProfile() {
-  if (!profileOverlay) return;
-
-  // 1) fade out
-  profileOverlay.classList.add("opacity-0");
-
-  // 2) after transition, hide fully
-  setTimeout(() => profileOverlay.classList.add("hidden"), 300);
-}
-
-profileLink?.addEventListener("click", openProfile);
-profileClose?.addEventListener("click", closeProfile);
-window.addEventListener("keydown", (e) => e.key === "Escape" && closeProfile());
-
-/* ─────────────────────────────────────────────────────────
-   Avatar upload preview
-   ───────────────────────────────────────────────────────── */
-const avatarInput = document.getElementById("avatar-input") as HTMLInputElement | null;
-const avatarImg   = document.getElementById("avatar-img")   as HTMLImageElement  | null;
-
-avatarInput?.addEventListener("change", () => {
-  if (!avatarInput.files?.length) return;
-  const file = avatarInput.files[0];
-  avatarImg!.src = URL.createObjectURL(file);
+/* ── burger (mobile) ───────────────────────────────── */
+$("#burger")?.addEventListener("click", () => {
+  $<HTMLElement>("#nav-menu")?.classList.toggle("hidden");
 });
 
-/* ─────────────────────────────────────────────────────────
-   Tabs + sliding underline
-   ───────────────────────────────────────────────────────── */
-const tabBtns   = document.querySelectorAll<HTMLButtonElement>("#profile-tabs .tab-btn");
-const panels    = document.querySelectorAll<HTMLElement>("#tab-panels .panel");
-const underline = document.getElementById("tab-underline") as HTMLSpanElement | null;
+/* ── overlay show / hide helpers ───────────────────── */
+const show = (el: HTMLElement) => {
+  el.classList.remove("hidden");
+  requestAnimationFrame(() => el.classList.remove("opacity-0"));
+};
+const hide = (el: HTMLElement) => {
+  el.classList.add("opacity-0");
+  setTimeout(() => el.classList.add("hidden"), 300);
+};
 
-function moveUnderline(btn: HTMLButtonElement) {
-  if (!underline) return;
-  underline.style.width     = `${btn.offsetWidth}px`;
-  underline.style.transform = `translateX(${btn.offsetLeft}px)`;
-}
+/* ── PROFILE overlay ───────────────────────────────── */
+const profile = $("#profile-overlay")!;
+$("#nav-profile")?.addEventListener("click", () => { show(profile); syncUnderline(); });
+$("#profile-close")?.addEventListener("click", () => hide(profile));
 
-tabBtns.forEach((btn) =>
+/* ── PLAY overlay ─────────────────────────────────── */
+const play = $("#play-overlay")!;
+$("#nav-play")?.addEventListener("click", () => show(play));
+$("#play-close")?.addEventListener("click", () => hide(play));
+
+/* Esc closes any open overlay */
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    hide(profile);
+    hide(play);
+  }
+});
+
+/* ── avatar preview ───────────────────────────────── */
+$("#avatar-input")?.addEventListener("change", (ev) => {
+  const f = (ev.currentTarget as HTMLInputElement).files?.[0];
+  if (f) ($<HTMLImageElement>("#avatar-img")!).src = URL.createObjectURL(f);
+});
+
+/* ── tabs + sliding underline ─────────────────────── */
+const tabs   = document.querySelectorAll<HTMLButtonElement>("#profile-tabs .tab-btn");
+const panels = document.querySelectorAll<HTMLElement>("#tab-panels .panel");
+const line   = $("#tab-underline")!;
+
+tabs.forEach((btn) =>
   btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
-
-    // underline animation
-    moveUnderline(btn);
-
-    // active / inactive colours
-    tabBtns.forEach((b) => {
-      b.classList.toggle("text-white",    b === btn);
+    tabs.forEach((b) => {
+      b.classList.toggle("text-white", b === btn);
       b.classList.toggle("text-white/70", b !== btn);
     });
 
-    // show / hide panels
-    panels.forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== target));
+    line.style.width = `${btn.offsetWidth}px`;
+    line.style.transform = `translateX(${btn.offsetLeft}px)`;
 
-    // lazy-initialise heavy panels
-    if (target === "stats")   initStatsTab();
-    if (target === "history") initHistoryTab();
+    panels.forEach((p) =>
+      p.classList.toggle("hidden", p.dataset.panel !== btn.dataset.tab)
+    );
+    if (btn.dataset.tab === "stats")   initStatsTab();
+    if (btn.dataset.tab === "history") initHistoryTab();
   })
 );
+function syncUnderline(): void {
+  const active = document.querySelector<HTMLButtonElement>("#profile-tabs .tab-btn.text-white");
+  if (active) {
+    line.style.width = `${active.offsetWidth}px`;
+    line.style.transform = `translateX(${active.offsetLeft}px)`;
+  }
+}
+window.addEventListener("resize", syncUnderline);
 
-// keep underline aligned on resize
-window.addEventListener("resize", () => {
-  const activeBtn = document.querySelector<HTMLButtonElement>(
-    "#profile-tabs .tab-btn.text-white"
-  );
-  if (activeBtn) moveUnderline(activeBtn);
+/* ── Play-mode cards ───────────────────────────────── */
+document.querySelectorAll<HTMLButtonElement>(".mode-card").forEach((card) => {
+  card.addEventListener("click", () => {
+    const mode = card.dataset.mode as "ai" | "offline" | "remote" | "tournament";
+    hide(play); // close the pop-up
+
+    if (mode === "ai")         window.setGameMode("ai");
+    else if (mode === "offline") window.setGameMode("pvp");
+    else alert(`Mode "${mode}" coming soon!`);
+  });
 });
