@@ -1,26 +1,25 @@
-/**
- * main.ts – Pong engine with 1 s / 0.5 s / 0.01 s AI
- * Strict-mode TypeScript
- */
-/* ═════════════ CONFIG ═════════════ */
-const GAME_SPEED = 1.25; // speed multiplier
-const BALL_SPEED_PX = 330; // base ball speed
-const PADDLE_FR = 0.45; // fraction of canvas-height per second
-const BALL_R = 10;
-const PAD_W = 12;
-const PAD_H = 80;
-const PAD_GAP = 24;
+const GAME_SPEED = 1.25; //all game speed
+const BALL_SPEED_PX = 330; //ball speed b px/s
+const PADDLE_FR = 0.45; //paddle speed height / s
+const BALL_R = 10; //bal radius
+const PAD_W = 12; //paddle width
+const PAD_H = 80; //oaddle height
+const PAD_GAP = 24; //distance between l paddle w edge
 /* ═════════════ COLORS ═════════════ */
 const COL_LEFT = "#22d3ee";
 const COL_RIGHT = "#fbbf24";
 const COL_BALL = "#f472b6";
 const COL_LINE = "#f3f4f6";
+/* ═════════════ NEW CONSTANTS ═════════════ */
+const SPEED_INC_DELAY = 12; // NEW: seconds after which speed starts to ramp
+const SPEED_INC_RATE = 0.1; // NEW: extra speed added per second after delay
+const MAX_SCORE = 3; // NEW: score needed to win the game
 /* ═════════════ DOM GRAB ═════════════ */
-const cvs = document.getElementById("pong-canvas");
+const cvs = document.getElementById("pong-canvas"); //get the canvas so we can add shapes
 const ctx = cvs.getContext("2d");
-const sLeft = document.getElementById("score-left");
-const sRight = document.getElementById("score-right");
-const startBtn = document.getElementById("start-btn");
+const sLeft = document.getElementById("score-left"); //left scorte
+const sRight = document.getElementById("score-right"); //right score
+const startBtn = document.getElementById("start-btn"); //start
 /* ═════════════ STATE ═════════════ */
 let left;
 let right;
@@ -30,24 +29,29 @@ let scoreR = 0;
 let playing = false;
 let gameMode = "pvp";
 let lastTime = performance.now();
-/* AI “refresh” interval (in seconds), set by difficulty */
-let AI_REFRESH = 1.0; // default easy = 1 s
-const AI_MAX_SPEED = 0.9; // can move at 90% of full paddle speed
-let aiAccumulator = 0; // accumulates dt until ≥ AI_REFRESH
-/* ═════════════ INITIALISE ═════════════ */
+//mhmd ali
+const AI_MAX_SPEED = 0.9;
+let AI_REFRESH = 0.05; // NEW: seconds between AI recalculations
+let aiAccumulator = 0;
+let roundElapsed = 0; // NEW: elapsed time in current round
+let prevSpeed = GAME_SPEED; // NEW: last applied speed multiplier
+//initialisation for the game
 resetObjects();
 resizeCanvas();
 render();
 updateScore();
+//on click aal play we hide it and start the game
 startBtn.addEventListener("click", () => {
-    // If the user clicks the ▶ button:
+    const overlay = document.getElementById("win-message"); // NEW: remove win overlay if present
+    if (overlay)
+        overlay.remove(); // NEW
     startBtn.classList.add("hidden");
     playing = true;
     lastTime = performance.now();
     requestAnimationFrame(loop);
 });
 window.addEventListener("resize", resizeCanvas);
-/* ═════════════ INPUT (keyboard) ═════════════ */
+//handling input (w, s, arrow up and arrow down)
 const keys = {};
 for (const type of ["keydown", "keyup"]) {
     window.addEventListener(type, (evt) => {
@@ -58,13 +62,27 @@ for (const type of ["keydown", "keyup"]) {
         keys[e.key] = type === "keydown";
     });
 }
-/* ═════════════ HELPERS ═════════════ */
-const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+//to keep the ball and the paddle on board
+const clamp = (v, lo, hi) => {
+    if (v < lo)
+        return lo;
+    if (v > hi)
+        return hi;
+    return v;
+};
+/* This func reset all game objects to start coordinates n speeds.
+   It put paddles back to their place and ball to 0,0 with zero velocity
+   so next code start from clean state. */
 function resetObjects() {
     left = { x: PAD_GAP, y: 0, w: PAD_W, h: PAD_H };
     right = { x: 0, y: 0, w: PAD_W, h: PAD_H };
     ball = { x: 0, y: 0, v: { x: 0, y: 0 }, r: BALL_R };
+    roundElapsed = 0; // NEW
+    prevSpeed = GAME_SPEED; // NEW
 }
+/* This one recenters paddles & ball in middle of canvas
+   and then launch the ball toward dir (1 to right, -1 to left)
+   using random angle for little variety, speed multiplied by GAME_SPEED. */
 function resetPositions(dir) {
     left.y = (cvs.height - PAD_H) / 2;
     right.y = (cvs.height - PAD_H) / 2;
@@ -74,7 +92,12 @@ function resetPositions(dir) {
     const angle = (Math.random() - 0.5) * (Math.PI / 3);
     ball.v.x = dir * speed * Math.cos(angle);
     ball.v.y = speed * Math.sin(angle);
+    roundElapsed = 0; // NEW: restart round timer
+    prevSpeed = GAME_SPEED; // NEW: reset speed multiplier
 }
+/* When window grow or shrink we call this.
+   It match canvas size to css size, move right paddle to new edge,
+   reset ball direction random and redraw so no weird stretch. */
 function resizeCanvas() {
     cvs.width = cvs.clientWidth;
     cvs.height = cvs.clientHeight;
@@ -82,7 +105,9 @@ function resizeCanvas() {
     resetPositions(Math.random() < 0.5 ? 1 : -1);
     render();
 }
-/* ═════════════ GAME LOOP ═════════════ */
+/* Main loop. Executed every animation frame.
+   Compute time delta, if game is active we update physics n render,
+   then schedule itself again. */
 function loop(now) {
     const dt = (now - lastTime) / 1000;
     lastTime = now;
@@ -92,8 +117,24 @@ function loop(now) {
     }
     requestAnimationFrame(loop);
 }
+/* This does all heavy lifting each frame:
+   - read keyboard for human
+   - move paddles
+   - run AI moves when in vs AI
+   - move ball, bounce on walls, detect paddle hit, change velocity
+   - check scoring and reset when ball exit
+   Whole thing uses dt to stay smooth even if FPS change. */
 function update(dt) {
-    const paddleV = cvs.height * PADDLE_FR * GAME_SPEED;
+    roundElapsed += dt; // NEW: accumulate time since last score
+    /* ––––– Dynamic speed ramp ––––– */
+    const currSpeed = GAME_SPEED + Math.max(0, roundElapsed - SPEED_INC_DELAY) * SPEED_INC_RATE; // NEW
+    if (currSpeed !== prevSpeed) {
+        const scale = currSpeed / prevSpeed; // NEW
+        ball.v.x *= scale; // NEW: boost current ball velocity
+        ball.v.y *= scale; // NEW
+        prevSpeed = currSpeed; // NEW
+    }
+    const paddleV = cvs.height * PADDLE_FR * currSpeed; // CHANGED: use dynamic speed
     /* ––––– Left paddle (human) ––––– */
     if (keys["w"])
         left.y -= paddleV * dt;
@@ -109,13 +150,13 @@ function update(dt) {
         right.y = clamp(right.y, 0, cvs.height - right.h);
     }
     else {
-        // AI: accumulate time; once ≥ AI_REFRESH, decide again
+        //mhmd ali (ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
         aiAccumulator += dt;
         if (aiAccumulator >= AI_REFRESH) {
             aiAccumulator -= AI_REFRESH;
             computeAIDecision();
         }
-        // In between decisions, hold whichever key was last set
+        //till here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (keys["ArrowUp"])
             right.y -= paddleV * AI_MAX_SPEED * dt;
         if (keys["ArrowDown"])
@@ -149,7 +190,7 @@ function update(dt) {
         const p = ball.v.x < 0 ? left : right;
         const rel = (ball.y - (p.y + p.h / 2)) / (p.h / 2);
         const ang = rel * (Math.PI / 3);
-        const spd = BALL_SPEED_PX * GAME_SPEED;
+        const spd = BALL_SPEED_PX * currSpeed; // CHANGED: use dynamic speed
         const dir = ball.v.x < 0 ? 1 : -1;
         ball.v.x = dir * spd * Math.cos(ang);
         ball.v.y = spd * Math.sin(ang);
@@ -158,36 +199,36 @@ function update(dt) {
     if (ball.x + BALL_R < 0) {
         scoreR++;
         updateScore();
-        resetPositions(1);
+        if (scoreR >= MAX_SCORE)
+            handleWin(); // NEW: check for winner
+        else
+            resetPositions(1);
     }
     else if (ball.x - BALL_R > cvs.width) {
         scoreL++;
         updateScore();
-        resetPositions(-1);
+        if (scoreL >= MAX_SCORE)
+            handleWin(); // NEW: check for winner
+        else
+            resetPositions(-1);
     }
 }
+/* Update the score DOM elements so player see current points. */
 function updateScore() {
     sLeft.textContent = String(scoreL);
     sRight.textContent = String(scoreR);
 }
-/**
- * AI decision (once per AI_REFRESH seconds):
- * • Only “sees” when ball.v.x > 0 (moving toward AI). Otherwise, releases keys.
- * • Predicts top/bottom wall bounces until ball.x ≥ right.x, then chooses ArrowUp/ArrowDown.
- */
+//mhmd ali
 function computeAIDecision() {
     if (ball.v.x <= 0) {
-        // Ball moving away; do nothing
         keys["ArrowUp"] = false;
         keys["ArrowDown"] = false;
         return;
     }
-    // Copy current ball state
     let bx = ball.x;
     let by = ball.y;
     let vx = ball.v.x;
     let vy = ball.v.y;
-    // Project forward until bx ≥ right.x
     while (true) {
         const dtX = (right.x - bx) / vx;
         const nextY = by + vy * dtX;
@@ -195,23 +236,19 @@ function computeAIDecision() {
             by = nextY;
             break;
         }
-        // Bounce off top/bottom
         if (vy > 0) {
-            // heading down → bottom at y = cvs.height - BALL_R
-            const dtW = ((cvs.height - BALL_R) - by) / vy;
+            const dtW = (cvs.height - BALL_R - by) / vy;
             bx += vx * dtW;
             by = cvs.height - BALL_R;
             vy = -vy;
         }
         else {
-            // heading up → top at y = BALL_R
             const dtW = (BALL_R - by) / vy;
             bx += vx * dtW;
             by = BALL_R;
             vy = -vy;
         }
     }
-    // by is predicted intercept Y at right.x
     const paddleCenter = right.y + right.h / 2;
     if (by < paddleCenter - 5) {
         keys["ArrowUp"] = true;
@@ -226,7 +263,8 @@ function computeAIDecision() {
         keys["ArrowDown"] = false;
     }
 }
-/* ═════════════ RENDER ═════════════ */
+/* Draw everything for the current frame:
+   clear screen, net, paddles, ball */
 function render() {
     ctx.clearRect(0, 0, cvs.width, cvs.height);
     drawNet();
@@ -234,6 +272,7 @@ function render() {
     drawPaddle(right, COL_RIGHT);
     drawBall();
 }
+/* Paint the vertical dashed net in centre by many small rectangles. */
 function drawNet() {
     ctx.fillStyle = COL_LINE;
     const w = 4, h = 18, gap = 12, x = cvs.width / 2 - w / 2;
@@ -241,44 +280,117 @@ function drawNet() {
         ctx.fillRect(x, y, w, h);
     }
 }
+/* draw a paddle rectangle using its x,y,w,h and chosen color. */
 function drawPaddle(p, col) {
     ctx.fillStyle = col;
     ctx.fillRect(p.x, p.y, p.w, p.h);
 }
+/* draw the ball as filled circle at current position. */
 function drawBall() {
     ctx.fillStyle = COL_BALL;
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
     ctx.fill();
 }
-/**
- * Called by nav.ts when user picks a difficulty:
- *   sec = 1.0 (easy) | 0.5 (medium) | 0.01 (impossible)
- */
+//mhmd ali
 window.setAIRefresh = (sec) => {
     AI_REFRESH = sec;
     aiAccumulator = 0; // reset timer
 };
-/**
- * Called by nav.ts when user picks PvP or VsAI:
- * • Resets scores, positions, etc.
- * • Hides ▶ button and immediately starts loop in chosen mode.
- */
+/* Switch between PvP and vs-AI, reset scores, hide play button and kick off game instantly. */
 window.setGameMode = (mode) => {
+    const overlay = document.getElementById("win-message"); // NEW: remove win overlay when switching mode
+    if (overlay)
+        overlay.remove(); // NEW
     gameMode = mode;
     scoreL = scoreR = 0;
     updateScore();
-    // Immediately start playing
     playing = true;
     startBtn.classList.add("hidden");
-    startBtn.textContent = mode === "ai"
-        ? "▶ PLAY VS AI"
-        : "▶ LET THE GAME BEGIN";
-    // Reset objects + place right.x correctly
+    startBtn.textContent =
+        mode === "ai" ? "▶ PLAY VS AI" : "▶ LET THE GAME BEGIN";
     resetObjects();
     resizeCanvas();
     lastTime = performance.now();
     aiAccumulator = 0;
     requestAnimationFrame(loop);
 };
+/* ═════════════ WIN MESSAGE ═════════════ */
+function handleWin() {
+    playing = false;
+    const winner = scoreL > scoreR ? "Left Player" : "Right Player";
+    let overlay = document.getElementById("win-message");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "win-message";
+        cvs.parentElement.style.position = "relative";
+        cvs.parentElement.appendChild(overlay);
+    }
+    overlay.innerHTML = `
+    <div class="msg-box">
+      <span class="winner">${winner} Wins!</span>
+      <button id="play-again">Play Again</button>
+    </div>
+  `;
+    overlay.className = "overlay";
+    if (!document.getElementById("win-style")) {
+        const style = document.createElement("style");
+        style.id = "win-style";
+        style.textContent = `
+      #win-message.overlay{
+        position:absolute;
+        inset:0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        pointer-events:auto;
+        backdrop-filter:blur(4px);
+      }
+      #win-message .msg-box{
+        background:linear-gradient(145deg,rgba(34,211,238,.25),rgba(251,191,36,.25));
+        border:3px solid #fff;
+        padding:2.5rem 4rem;
+        border-radius:14px;
+        box-shadow:0 0 25px rgba(255,255,255,.6),0 0 8px rgba(0,0,0,.4) inset;
+        text-align:center;
+      }
+      #win-message .winner{
+        font-size:3rem;
+        font-weight:800;
+        color:#fff;
+        text-shadow:0 0 8px #fff;
+      }
+      #play-again{
+        margin-top:1.75rem;
+        padding:.6rem 2.5rem;
+        font-size:1.35rem;
+        font-weight:700;
+        border:none;
+        border-radius:10px;
+        background:#f472b6;
+        color:#fff;
+        cursor:pointer;
+        transition:transform .2s,filter .2s;
+      }
+      #play-again:hover{
+        transform:scale(1.05);
+        filter:brightness(1.15);
+      }
+    `;
+        document.head.appendChild(style);
+    }
+    const againBtn = document.getElementById("play-again");
+    againBtn.onclick = () => {
+        overlay.remove();
+        scoreL = scoreR = 0;
+        updateScore();
+        playing = true;
+        startBtn.classList.add("hidden");
+        resetObjects();
+        resizeCanvas();
+        lastTime = performance.now();
+        aiAccumulator = 0;
+        requestAnimationFrame(loop);
+    };
+}
 export {};

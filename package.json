@@ -11,5 +11,17 @@
   },
   "dependencies": {
     "chart.js": "^4.4.9"
-  }
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Omarak9120/ft_transcendence.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Omarak9120/ft_transcendence/issues"
+  },
+  "homepage": "https://github.com/Omarak9120/ft_transcendence#readme"
 }
