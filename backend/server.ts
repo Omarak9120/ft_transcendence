@@ -14,7 +14,7 @@ fastify.get('/', async (req, reply) => {
 
 const start = async () => {
   try {
-    // 👇 Register the signup route before listening
+    //  Register the signup route before listening
     await fastify.register(signupRoutes);
     await fastify.register(loginRoutes);
     await fastify.register(matchRoutes);
@@ -30,3 +30,5 @@ const start = async () => {
 };
 
 start();
+
+//npx ts-node server.ts
