@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Tailwind CSS – CDN “browser” build -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
 
     <!-- ───────────── Sleek scrollbars (fuchsia main, amber inner) -->
     <style>
@@ -35,69 +34,94 @@
     </style>
   </head>
 
-  <body class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600 text-white selection:bg-pink-400/40">
+  <body
+    class="min-h-screen flex flex-col
+           bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600
+           text-white selection:bg-pink-400/40"
+  >
     <!-- ░░ NAVBAR ░░ -->
     <header class="sticky top-0 bg-black/50 backdrop-blur-md z-50">
       <nav class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16">
         <a href="#" class="text-3xl font-extrabold">⚡ ft_transcendence</a>
+
         <button id="burger" class="sm:hidden text-white">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"
-               viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            class="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
+
         <ul id="nav-menu" class="hidden sm:flex space-x-8">
-        <li><a href="#" class="hover:text-pink-200">Home</a></li>
-        <li><a href="#" id="nav-play" class="hover:text-pink-200">Play</a></li> <!-- keep this -->
-        <li><a href="#" id="nav-profile" class="hover:text-pink-200">Profile</a></li>
+          <li><button class="hover:text-pink-200" data-nav="home">Home</button></li>
+          <li><button id="nav-play" class="hover:text-pink-200">Play</button></li>
+          <li><button id="nav-profile" class="hover:text-pink-200">Profile</button></li>
         </ul>
       </nav>
     </header>
 
     <!-- ░░ GAME AREA ░░ -->
     <main class="flex-grow flex items-center justify-center p-8">
-      <div id="game-container"
-           class="relative w-full max-w-xl aspect-video bg-gray-900/70 rounded-3xl
-                  shadow-2xl overflow-hidden">
+      <div
+        id="game-container"
+        class="relative w-full max-w-4xl aspect-video bg-gray-900/70 rounded-3xl shadow-2xl overflow-hidden"
+      >
         <canvas id="pong-canvas" class="w-full h-full rounded-3xl"></canvas>
 
         <!-- SCOREBOARD -->
-        <div id="scoreboard"
-             class="absolute top-4 left-1/2 -translate-x-1/2 text-4xl font-extrabold
-                    flex gap-3 drop-shadow-[0_0_8px_rgb(0_0_0/0.9)] select-none z-10">
-          <span id="score-left"  class="text-cyan-300">0</span>
+        <div
+          id="scoreboard"
+          class="absolute top-4 left-1/2 -translate-x-1/2 text-4xl font-extrabold flex gap-3 drop-shadow-[0_0_8px_rgb(0_0_0/0.9)] select-none z-10"
+        >
+          <span id="score-left" class="text-cyan-300">0</span>
           <span>:</span>
           <span id="score-right" class="text-amber-300">0</span>
         </div>
 
         <!-- START OVERLAY -->
-        <button id="start-btn"
+        <button
+          id="start-btn"
           class="absolute inset-0 flex items-center justify-center z-20
                  bg-black/40 backdrop-blur-sm text-3xl md:text-5xl font-extrabold
                  tracking-wide text-white hover:scale-105 transition
                  before:absolute before:inset-0 before:-z-10 before:rounded-3xl
                  before:bg-[conic-gradient(at_top_left,_theme(colors.cyan.400),
                  _theme(colors.fuchsia.500),_theme(colors.amber.400))]
-                 before:opacity-40 before:blur-2xl">
+                 before:opacity-40 before:blur-2xl"
+        >
           ▶ LET&nbsp;THE&nbsp;GAME&nbsp;BEGIN
         </button>
       </div>
     </main>
 
     <!-- ░░ PROFILE MINI-PAGE ░░ -->
-    <div id="profile-overlay"
-         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center
-                justify-center z-[60] hidden opacity-0 transition-opacity duration-300">
+    <div
+      id="profile-overlay"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] hidden opacity-0 transition-opacity duration-300"
+    >
       <div
-        class="relative w-full max-w-3xl h-[90vh]
-               bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600
-               text-white p-8 rounded-3xl shadow-2xl flex flex-col"
+        class="relative w-full max-w-3xl h-[90vh] bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600 text-white p-8 rounded-3xl shadow-2xl flex flex-col"
       >
         <!-- close × -->
-        <button id="profile-close"
-                class="absolute top-4 right-4 text-white/70 hover:text-white">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-               viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          id="profile-close"
+          class="absolute top-4 right-4 text-white/70 hover:text-white"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -106,22 +130,32 @@
         <div class="flex items-center gap-6 mb-8">
           <div
             class="group relative w-24 h-24 rounded-full p-[3px]
-                      bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-amber-400 shrink-0">
-            <img id="avatar-img"
-                 src="https://i.pravatar.cc/150?u=user"
-                 alt="Profile picture"
-                 class="w-full h-full object-cover rounded-full" />
-            <label for="avatar-input"
-              class="absolute inset-0 rounded-full bg-black/50 flex
-                     items-center justify-center opacity-0 group-hover:opacity-100
-                     transition cursor-pointer"
-              title="Change picture">
-              <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                    stroke-width="2" viewBox="0 0 24 24"
-                    stroke-linecap="round" stroke-linejoin="round">
+                   bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-amber-400 shrink-0"
+          >
+            <img
+              id="avatar-img"
+              src="https://i.pravatar.cc/150?u=user"
+              alt="Profile picture"
+              class="w-full h-full object-cover rounded-full"
+            />
+            <label
+              for="avatar-input"
+              class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
+              title="Change picture"
+            >
+              <svg
+                class="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path
-                  d="M3 7h4l2-3h6l2 3h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
-                <circle cx="12" cy="13" r="4"/>
+                  d="M3 7h4l2-3h6l2 3h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"
+                />
+                <circle cx="12" cy="13" r="4" />
               </svg>
             </label>
             <input type="file" id="avatar-input" accept="image/*" class="hidden" />
@@ -133,25 +167,48 @@
         </div>
 
         <!-- TAB BAR -->
-        <nav id="profile-tabs"
-             class="relative flex space-x-8 border-b border-white/30 text-white/70 overflow-x-auto">
-          <button type="button" data-tab="info"
-                  class="tab-btn pb-2 cursor-pointer text-white">Info</button>
-          <button type="button" data-tab="stats"
-                  class="tab-btn pb-2 cursor-pointer">Stats</button>
-          <button type="button" data-tab="history"
-                  class="tab-btn pb-2 cursor-pointer">History</button>
-          <button type="button" data-tab="friends"
-                  class="tab-btn pb-2 cursor-pointer">Friends</button>
+        <nav
+          id="profile-tabs"
+          class="relative flex space-x-8 border-b border-white/30 text-white/70 overflow-x-auto"
+        >
+          <button
+            type="button"
+            data-tab="info"
+            class="tab-btn pb-2 cursor-pointer text-white"
+          >
+            Info
+          </button>
+          <button
+            type="button"
+            data-tab="stats"
+            class="tab-btn pb-2 cursor-pointer"
+          >
+            Stats
+          </button>
+          <button
+            type="button"
+            data-tab="history"
+            class="tab-btn pb-2 cursor-pointer"
+          >
+            History
+          </button>
+          <button
+            type="button"
+            data-tab="friends"
+            class="tab-btn pb-2 cursor-pointer"
+          >
+            Friends
+          </button>
+
           <!-- sliding underline -->
-          <span id="tab-underline"
-                class="absolute bottom-0 h-0.5 bg-amber-400
-                       transition-all duration-300"></span>
+          <span
+            id="tab-underline"
+            class="absolute bottom-0 h-0.5 bg-amber-400 transition-all duration-300"
+          ></span>
         </nav>
 
         <!-- TAB PANELS -->
         <div id="tab-panels" class="flex-1 overflow-y-auto pt-6">
-
           <!-- INFO -->
           <section data-panel="info" class="panel">
             <h3 class="text-xl font-semibold mb-4">About Me</h3>
@@ -159,40 +216,42 @@
           </section>
 
           <!-- STATS -->
-        <section data-panel="stats" class="panel hidden custom-scroll">
-          <!-- Monthly wins (already there) -->
-          <h3 class="text-xl font-semibold mb-4">Monthly average winning games</h3>
-          <canvas id="monthly-chart" class="max-w-full mb-8"></canvas>
+          <section data-panel="stats" class="panel hidden custom-scroll">
+            <h3 class="text-xl font-semibold mb-4">
+              Monthly average winning games
+            </h3>
+            <canvas id="monthly-chart" class="max-w-full mb-8"></canvas>
 
-          <!-- Life pie (already there) -->
-          <h3 class="text-xl font-semibold mb-4">Life average winning games</h3>
-          <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
+            <h3 class="text-xl font-semibold mb-4">
+              Life average winning games
+            </h3>
+            <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
-          <!-- NEW ↓ goals pie -->
-          <h3 class="text-xl font-semibold mb-4">Goals scored vs conceded</h3>
-          <canvas id="goals-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
+            <h3 class="text-xl font-semibold mb-4">
+              Goals scored vs conceded
+            </h3>
+            <canvas id="goals-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
-          <!-- NEW ↓ paddle hits -->
-          <h3 class="text-xl font-semibold mb-4">Monthly goals scored vs conceded</h3>
-          <canvas id="hits-chart" class="max-w-full mb-8"></canvas>
+            <h3 class="text-xl font-semibold mb-4">
+              Monthly goals scored vs conceded
+            </h3>
+            <canvas id="hits-chart" class="max-w-full mb-8"></canvas>
 
-          <!-- NEW ↓ longest paddle-hit -->
-          <h3 class="text-xl font-semibold mb-2">Longest paddle-hit (single match)</h3>
-          <div id="longest-hit-card"
-              class="flex flex-col items-center justify-center gap-1 p-4 mb-8
-                      rounded-xl bg-white/10 backdrop-blur border border-white/20">
-            <span class="text-4xl font-extrabold">0</span>
-            <p class="text-xs text-white/70">consecutive hits</p>
-            <!-- new line for opponent -->
-            <p id="longest-opponent" class="text-xs text-white/50">vs ­—</p>
-          </div>
+            <h3 class="text-xl font-semibold mb-2">
+              Longest paddle-hit (single match)
+            </h3>
+            <div
+              id="longest-hit-card"
+              class="flex flex-col items-center justify-center gap-1 p-4 mb-8 rounded-xl bg-white/10 backdrop-blur border border-white/20"
+            >
+              <span class="text-4xl font-extrabold">0</span>
+              <p class="text-xs text-white/70">consecutive hits</p>
+              <p id="longest-opponent" class="text-xs text-white/50">vs ­—</p>
+            </div>
 
-
-          <!-- Trophy total card (unchanged) -->
-          <h3 class="text-xl font-semibold mb-4">Trophies</h3>
-          <div id="trophies"></div>
-        </section>
-
+            <h3 class="text-xl font-semibold mb-4">Trophies</h3>
+            <div id="trophies"></div>
+          </section>
 
           <!-- HISTORY -->
           <section data-panel="history" class="panel hidden">
@@ -218,16 +277,14 @@
             <h3 class="text-xl font-semibold mb-4">Friends</h3>
             <ul class="space-y-4">
               <li class="flex items-center gap-4">
-                <img src="https://i.pravatar.cc/40?u=a"
-                     class="w-10 h-10 rounded-full" />
+                <img src="https://i.pravatar.cc/40?u=a" class="w-10 h-10 rounded-full" />
                 <span class="flex-1">Aya</span>
                 <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
                   Challenge
                 </button>
               </li>
               <li class="flex items-center gap-4">
-                <img src="https://i.pravatar.cc/40?u=b"
-                     class="w-10 h-10 rounded-full" />
+                <img src="https://i.pravatar.cc/40?u=b" class="w-10 h-10 rounded-full" />
                 <span class="flex-1">Karim</span>
                 <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
                   Challenge
@@ -240,18 +297,28 @@
     </div>
 
     <!-- ░░ PLAY POP-UP ░░ -->
-    <div id="play-overlay"
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center
-                justify-center z-[60] hidden opacity-0 transition-opacity duration-300">
-      <div class="relative w-full max-w-3xl p-10 rounded-3xl shadow-2xl
-                  bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700
-                  text-white flex flex-col gap-8">
+    <div
+      id="play-overlay"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] hidden opacity-0 transition-opacity duration-300"
+    >
+      <div
+        class="relative w-full max-w-3xl p-10 rounded-3xl shadow-2xl bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-700 text-white flex flex-col gap-8"
+      >
         <!-- close × -->
-        <button id="play-close"
-                class="absolute top-4 right-4 text-white/70 hover:text-white">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 18L18 6M6 6l12 12"/>
+        <button
+          id="play-close"
+          class="absolute top-4 right-4 text-white/70 hover:text-white"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
@@ -260,12 +327,13 @@
           <p class="text-sm text-white/70">Pick how you want to play</p>
         </header>
 
-        <!-- 2 × 2 grid of mode cards -->
+        <!-- 2 × 2 grid of mode cards (original layout) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- vs AI -->
           <button data-mode="ai"
                   class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                        bg-white/10 hover:bg-white/15 transition">
+                         bg-white/10 hover:bg-white/15 transition"
+          >
             <span class="text-5xl">🤖</span>
             <span class="text-lg font-semibold">Vs&nbsp;AI</span>
             <p class="text-xs text-white/70 text-center">Practice against the computer</p>
@@ -274,7 +342,8 @@
           <!-- offline 1-on-1 -->
           <button data-mode="offline"
                   class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                        bg-white/10 hover:bg-white/15 transition">
+                         bg-white/10 hover:bg-white/15 transition"
+          >
             <span class="text-5xl">🎮</span>
             <span class="text-lg font-semibold">1&nbsp;v&nbsp;1&nbsp;(offline)</span>
             <p class="text-xs text-white/70 text-center">Two players on the same device</p>
@@ -283,7 +352,8 @@
           <!-- remote -->
           <button data-mode="remote"
                   class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                        bg-white/10 hover:bg-white/15 transition">
+                         bg-white/10 hover:bg-white/15 transition"
+          >
             <span class="text-5xl">🌐</span>
             <span class="text-lg font-semibold">Remote&nbsp;Play</span>
             <p class="text-xs text-white/70 text-center">Invite a friend or join matchmaking</p>
@@ -292,7 +362,8 @@
           <!-- tournament -->
           <button data-mode="tournament"
                   class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                        bg-white/10 hover:bg-white/15 transition">
+                         bg-white/10 hover:bg-white/15 transition"
+          >
             <span class="text-5xl">🏆</span>
             <span class="text-lg font-semibold">Tournament</span>
             <p class="text-xs text-white/70 text-center">Bracket-style knockout fun</p>
@@ -301,7 +372,59 @@
       </div>
     </div>
 
+    <!-- ░░ DIFFICULTY POP-UP ░░ -->
+    <div
+      id="difficulty-overlay"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] hidden opacity-0 transition-opacity duration-300"
+    >
+      <div
+        id="difficulty-container"
+        class="relative w-full max-w-md p-8 rounded-3xl shadow-2xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex flex-col items-center gap-6 transform scale-90 transition-transform duration-300"
+      >
+        <!-- close × -->
+        <button
+          id="difficulty-close"
+          class="absolute top-4 right-4 text-white/70 hover:text-white"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
+        <h2 class="text-2xl font-bold">Select Difficulty</h2>
+        <div class="flex flex-col gap-4 w-full">
+          <button
+            data-diff="easy"
+            class="diff-btn w-full py-2 rounded-full bg-white/10 hover:bg-white/15 transition"
+          >
+            Easy
+          </button>
+          <button
+            data-diff="medium"
+            class="diff-btn w-full py-2 rounded-full bg-white/10 hover:bg-white/15 transition"
+          >
+            Medium
+          </button>
+          <button
+            data-diff="hard"
+            class="diff-btn w-full py-2 rounded-full bg-white/10 hover:bg-white/15 transition"
+          >
+            Training mode
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE-CARD & DIFFICULTY STYLES (unchanged) -->
+    
 
     <!-- compiled scripts -->
     <script type="module" src="./dist/nav.js"></script>
