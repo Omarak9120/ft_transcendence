@@ -1,16 +1,16 @@
 /**
- * main.ts – Pong engine with optional AI opponent
+ * main.ts – Pong engine with 1 s / 0.5 s / 0.01 s AI
  * Strict-mode TypeScript
  */
 /* ═════════════ CONFIG ═════════════ */
-const GAME_SPEED = 1.25;
-const BALL_SPEED_PX = 330;
-const PADDLE_FR = 0.45; // fraction of canvas-height / second
+const GAME_SPEED = 1.25; // speed multiplier
+const BALL_SPEED_PX = 330; // base ball speed
+const PADDLE_FR = 0.45; // fraction of canvas-height per second
 const BALL_R = 10;
 const PAD_W = 12;
 const PAD_H = 80;
 const PAD_GAP = 24;
-/* ═════════════ COLOURS ═════════════ */
+/* ═════════════ COLORS ═════════════ */
 const COL_LEFT = "#22d3ee";
 const COL_RIGHT = "#fbbf24";
 const COL_BALL = "#f472b6";
@@ -30,16 +30,17 @@ let scoreR = 0;
 let playing = false;
 let gameMode = "pvp";
 let lastTime = performance.now();
-/* AI TUNING */
-const AI_REACTION = 0.6; // [0..1], higher = “smarter”
-const AI_MAX = 0.9; // max paddle speed as a fraction of human speed
+/* AI “refresh” interval (in seconds), set by difficulty */
+let AI_REFRESH = 1.0; // default easy = 1 s
+const AI_MAX_SPEED = 0.9; // can move at 90% of full paddle speed
+let aiAccumulator = 0; // accumulates dt until ≥ AI_REFRESH
 /* ═════════════ INITIALISE ═════════════ */
 resetObjects();
 resizeCanvas();
 render();
 updateScore();
 startBtn.addEventListener("click", () => {
-    // If the user explicitly clicks ▶, start the loop.
+    // If the user clicks the ▶ button:
     startBtn.classList.add("hidden");
     playing = true;
     lastTime = performance.now();
@@ -61,7 +62,7 @@ for (const type of ["keydown", "keyup"]) {
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 function resetObjects() {
     left = { x: PAD_GAP, y: 0, w: PAD_W, h: PAD_H };
-    right = { x: 0, y: 0, w: PAD_W, h: PAD_H }; // will be set properly in resizeCanvas()
+    right = { x: 0, y: 0, w: PAD_W, h: PAD_H };
     ball = { x: 0, y: 0, v: { x: 0, y: 0 }, r: BALL_R };
 }
 function resetPositions(dir) {
@@ -77,9 +78,7 @@ function resetPositions(dir) {
 function resizeCanvas() {
     cvs.width = cvs.clientWidth;
     cvs.height = cvs.clientHeight;
-    // Now place the right paddle on the far right:
-    right.x = cvs.width - PAD_GAP - right.w;
-    // Reset ball + paddles to center:
+    right.x = cvs.width - PAD_GAP - right.w; // far right
     resetPositions(Math.random() < 0.5 ? 1 : -1);
     render();
 }
@@ -95,36 +94,43 @@ function loop(now) {
 }
 function update(dt) {
     const paddleV = cvs.height * PADDLE_FR * GAME_SPEED;
-    /* Left paddle always human */
+    /* ––––– Left paddle (human) ––––– */
     if (keys["w"])
         left.y -= paddleV * dt;
     if (keys["s"])
         left.y += paddleV * dt;
-    /* Right paddle: human vs AI choice */
+    left.y = clamp(left.y, 0, cvs.height - left.h);
+    /* ––––– Right paddle ––––– */
     if (gameMode === "pvp") {
         if (keys["ArrowUp"])
             right.y -= paddleV * dt;
         if (keys["ArrowDown"])
             right.y += paddleV * dt;
+        right.y = clamp(right.y, 0, cvs.height - right.h);
     }
-    else { // simple AI
-        const target = ball.y - right.h / 2;
-        const diff = target - right.y;
-        const maxD = paddleV * AI_MAX * dt;
-        right.y += clamp(diff * AI_REACTION, -maxD, maxD);
+    else {
+        // AI: accumulate time; once ≥ AI_REFRESH, decide again
+        aiAccumulator += dt;
+        if (aiAccumulator >= AI_REFRESH) {
+            aiAccumulator -= AI_REFRESH;
+            computeAIDecision();
+        }
+        // In between decisions, hold whichever key was last set
+        if (keys["ArrowUp"])
+            right.y -= paddleV * AI_MAX_SPEED * dt;
+        if (keys["ArrowDown"])
+            right.y += paddleV * AI_MAX_SPEED * dt;
+        right.y = clamp(right.y, 0, cvs.height - right.h);
     }
-    // clamp both paddles inside canvas
-    left.y = clamp(left.y, 0, cvs.height - left.h);
-    right.y = clamp(right.y, 0, cvs.height - right.h);
-    /* Ball physics */
+    /* ––––– Ball physics ––––– */
     ball.x += ball.v.x * dt;
     ball.y += ball.v.y * dt;
-    // Bounce off top / bottom:
+    // bounce off top/bottom
     if (ball.y - BALL_R < 0 || ball.y + BALL_R > cvs.height) {
         ball.v.y *= -1;
         ball.y = clamp(ball.y, BALL_R, cvs.height - BALL_R);
     }
-    // Paddle collisions:
+    // paddle collisions
     const hitPaddle = (p, side) => {
         const inY = ball.y >= p.y && ball.y <= p.y + p.h;
         if (!inY)
@@ -141,14 +147,14 @@ function update(dt) {
     };
     if (hitPaddle(left, "left") || hitPaddle(right, "right")) {
         const p = ball.v.x < 0 ? left : right;
-        const rel = (ball.y - (p.y + p.h / 2)) / (p.h / 2); // –1..+1
-        const ang = rel * (Math.PI / 3); // ±60°
+        const rel = (ball.y - (p.y + p.h / 2)) / (p.h / 2);
+        const ang = rel * (Math.PI / 3);
         const spd = BALL_SPEED_PX * GAME_SPEED;
         const dir = ball.v.x < 0 ? 1 : -1;
         ball.v.x = dir * spd * Math.cos(ang);
         ball.v.y = spd * Math.sin(ang);
     }
-    // Scoring:
+    /* ––––– Scoring ––––– */
     if (ball.x + BALL_R < 0) {
         scoreR++;
         updateScore();
@@ -163,6 +169,62 @@ function update(dt) {
 function updateScore() {
     sLeft.textContent = String(scoreL);
     sRight.textContent = String(scoreR);
+}
+/**
+ * AI decision (once per AI_REFRESH seconds):
+ * • Only “sees” when ball.v.x > 0 (moving toward AI). Otherwise, releases keys.
+ * • Predicts top/bottom wall bounces until ball.x ≥ right.x, then chooses ArrowUp/ArrowDown.
+ */
+function computeAIDecision() {
+    if (ball.v.x <= 0) {
+        // Ball moving away; do nothing
+        keys["ArrowUp"] = false;
+        keys["ArrowDown"] = false;
+        return;
+    }
+    // Copy current ball state
+    let bx = ball.x;
+    let by = ball.y;
+    let vx = ball.v.x;
+    let vy = ball.v.y;
+    // Project forward until bx ≥ right.x
+    while (true) {
+        const dtX = (right.x - bx) / vx;
+        const nextY = by + vy * dtX;
+        if (nextY >= BALL_R && nextY <= cvs.height - BALL_R) {
+            by = nextY;
+            break;
+        }
+        // Bounce off top/bottom
+        if (vy > 0) {
+            // heading down → bottom at y = cvs.height - BALL_R
+            const dtW = ((cvs.height - BALL_R) - by) / vy;
+            bx += vx * dtW;
+            by = cvs.height - BALL_R;
+            vy = -vy;
+        }
+        else {
+            // heading up → top at y = BALL_R
+            const dtW = (BALL_R - by) / vy;
+            bx += vx * dtW;
+            by = BALL_R;
+            vy = -vy;
+        }
+    }
+    // by is predicted intercept Y at right.x
+    const paddleCenter = right.y + right.h / 2;
+    if (by < paddleCenter - 5) {
+        keys["ArrowUp"] = true;
+        keys["ArrowDown"] = false;
+    }
+    else if (by > paddleCenter + 5) {
+        keys["ArrowUp"] = false;
+        keys["ArrowDown"] = true;
+    }
+    else {
+        keys["ArrowUp"] = false;
+        keys["ArrowDown"] = false;
+    }
 }
 /* ═════════════ RENDER ═════════════ */
 function render() {
@@ -189,21 +251,34 @@ function drawBall() {
     ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
     ctx.fill();
 }
+/**
+ * Called by nav.ts when user picks a difficulty:
+ *   sec = 1.0 (easy) | 0.5 (medium) | 0.01 (impossible)
+ */
+window.setAIRefresh = (sec) => {
+    AI_REFRESH = sec;
+    aiAccumulator = 0; // reset timer
+};
+/**
+ * Called by nav.ts when user picks PvP or VsAI:
+ * • Resets scores, positions, etc.
+ * • Hides ▶ button and immediately starts loop in chosen mode.
+ */
 window.setGameMode = (mode) => {
     gameMode = mode;
     scoreL = scoreR = 0;
     updateScore();
-    // Immediately start the game (no need to click ▶ again)
+    // Immediately start playing
     playing = true;
     startBtn.classList.add("hidden");
     startBtn.textContent = mode === "ai"
         ? "▶ PLAY VS AI"
         : "▶ LET THE GAME BEGIN";
-    // Reset everything, including right.x via resizeCanvas()
+    // Reset objects + place right.x correctly
     resetObjects();
     resizeCanvas();
-    // Kick off the loop
     lastTime = performance.now();
+    aiAccumulator = 0;
     requestAnimationFrame(loop);
 };
 export {};
