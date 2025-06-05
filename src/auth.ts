@@ -41,7 +41,7 @@ function validatePassword(pw: string): string | null {
   if (pw.length < 8) return "Password must be at least 8 characters.";
   if (!/[A-Z]/.test(pw)) return "Password needs at least one capital letter.";
   if (!/\d/.test(pw)) return "Password needs at least one number.";
-  if (!/gay/i.test(pw)) return 'Password must include the word "gay".';
+  if (!/jnde/i.test(pw)) return 'Password must include the word "jnde".';
   return null;
 }
 
