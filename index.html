@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ft_transcendence</title>
+    <title>ftt_transcendence</title>
 
     <!-- Chart.js for the graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -13,35 +13,54 @@
     <!-- ───────────── Sleek scrollbars (fuchsia main, amber inner) -->
     <style>
       /* Main scroll area in the profile page */
-      #tab-panels::-webkit-scrollbar           { width: 10px; }
-      #tab-panels::-webkit-scrollbar-track     { background: rgba(255,255,255,0.07);
-                                                 border-radius: 10px; }
-      #tab-panels::-webkit-scrollbar-thumb     { background: rgba(232,  60, 140, 0.85); /* fuchsia-500 */
-                                                 border-radius: 10px; }
-      #tab-panels:hover::-webkit-scrollbar-thumb { background: rgba(232, 60, 140, 1); }
-      #tab-panels                               { scrollbar-width: thin;
-                                                  scrollbar-color: rgba(232,60,140,0.9)
-                                                                   rgba(255,255,255,0.07); }
+      #tab-panels::-webkit-scrollbar {
+        width: 10px;
+      }
+      #tab-panels::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+      }
+      #tab-panels::-webkit-scrollbar-thumb {
+        background: rgba(232, 60, 140, 0.85);
+        border-radius: 10px;
+      }
+      #tab-panels:hover::-webkit-scrollbar-thumb {
+        background: rgba(232, 60, 140, 1);
+      }
+      #tab-panels {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(232, 60, 140, 0.9) rgba(255, 255, 255, 0.07);
+      }
 
       /* Amber variant for anything with .custom-scroll */
-      .custom-scroll::-webkit-scrollbar        { width: 8px; }
-      .custom-scroll::-webkit-scrollbar-track  { background: transparent; }
-      .custom-scroll::-webkit-scrollbar-thumb  { background: rgba(251,191,36,0.9); /* amber-400 */
-                                                 border-radius: 8px; }
-      .custom-scroll:hover::-webkit-scrollbar-thumb { background: rgba(253,224,71,1); /* amber-300 */ }
-      .custom-scroll                           { scrollbar-width: thin;
-                                                 scrollbar-color: rgba(251,191,36,0.9) transparent; }
+      .custom-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(251, 191, 36, 0.9);
+        border-radius: 8px;
+      }
+      .custom-scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(253, 224, 71, 1);
+      }
+      .custom-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(251, 191, 36, 0.9) transparent;
+      }
     </style>
   </head>
 
   <body
-    class="min-h-screen flex flex-col
-           bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600
-           text-white selection:bg-pink-400/40"
+    class="min-h-screen flex flex-col bg-gradient-to-br from-indigo-700 via-purple-700 to-rose-600 text-white selection:bg-pink-400/40"
   >
     <!-- ░░ NAVBAR ░░ -->
     <header class="sticky top-0 bg-black/50 backdrop-blur-md z-50">
-      <nav class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16">
+      <nav
+        class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16"
+      >
         <a href="#" class="text-3xl font-extrabold">⚡ ft_transcendence</a>
 
         <button id="burger" class="sm:hidden text-white">
@@ -58,10 +77,40 @@
           </svg>
         </button>
 
-        <ul id="nav-menu" class="hidden sm:flex space-x-8">
-          <li><button class="hover:text-pink-200" data-nav="home">Home</button></li>
-          <li><button id="nav-play" class="hover:text-pink-200">Play</button></li>
-          <li><button id="nav-profile" class="hover:text-pink-200">Profile</button></li>
+        <!-- nav-menu gets mobile layout classes toggled in nav.ts -->
+        <ul id="nav-menu" class="hidden sm:flex sm:space-x-8">
+          <li>
+            <button
+              class="hover:text-pink-200 transition-transform duration-200 hover:scale-105"
+              data-nav="home"
+            >
+              Home
+            </button>
+          </li>
+          <li>
+            <button
+              id="nav-play"
+              class="hover:text-pink-200 transition-transform duration-200 hover:scale-105"
+            >
+              Play
+            </button>
+          </li>
+          <li>
+            <button
+              id="nav-profile"
+              class="hover:text-pink-200 transition-transform duration-200 hover:scale-105"
+            >
+              Profile
+            </button>
+          </li>
+          <li>
+            <button
+              id="nav-signout"
+              class="hover:text-pink-200 transition-transform duration-200 hover:scale-105"
+            >
+              Sign&nbsp;Out
+            </button>
+          </li>
         </ul>
       </nav>
     </header>
@@ -87,13 +136,7 @@
         <!-- START OVERLAY -->
         <button
           id="start-btn"
-          class="absolute inset-0 flex items-center justify-center z-20
-                 bg-black/40 backdrop-blur-sm text-3xl md:text-5xl font-extrabold
-                 tracking-wide text-white hover:scale-105 transition
-                 before:absolute before:inset-0 before:-z-10 before:rounded-3xl
-                 before:bg-[conic-gradient(at_top_left,_theme(colors.cyan.400),
-                 _theme(colors.fuchsia.500),_theme(colors.amber.400))]
-                 before:opacity-40 before:blur-2xl"
+          class="absolute inset-0 flex items-center justify-center z-20 bg-black/40 backdrop-blur-sm text-3xl md:text-5xl font-extrabold tracking-wide text-white hover:scale-105 transition before:absolute before:inset-0 before:-z-10 before:rounded-3xl before:bg-[conic-gradient(at_top_left,_theme(colors.cyan.400), _theme(colors.fuchsia.500),_theme(colors.amber.400))] before:opacity-40 before:blur-2xl"
         >
           ▶ LET&nbsp;THE&nbsp;GAME&nbsp;BEGIN
         </button>
@@ -129,8 +172,7 @@
         <!-- header -->
         <div class="flex items-center gap-6 mb-8">
           <div
-            class="group relative w-24 h-24 rounded-full p-[3px]
-                   bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-amber-400 shrink-0"
+            class="group relative w-24 h-24 rounded-full p-[3px] bg-gradient-to-br from-cyan-400 via-fuchsia-500 to-amber-400 shrink-0"
           >
             <img
               id="avatar-img"
@@ -158,7 +200,12 @@
                 <circle cx="12" cy="13" r="4" />
               </svg>
             </label>
-            <input type="file" id="avatar-input" accept="image/*" class="hidden" />
+            <input
+              type="file"
+              id="avatar-input"
+              accept="image/*"
+              class="hidden"
+            />
           </div>
           <div>
             <h2 class="text-3xl font-bold">Mohammad Ali</h2>
@@ -227,9 +274,7 @@
             </h3>
             <canvas id="life-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
-            <h3 class="text-xl font-semibold mb-4">
-              Goals scored vs conceded
-            </h3>
+            <h3 class="text-xl font-semibold mb-4">Goals scored vs conceded</h3>
             <canvas id="goals-chart" class="w-56 h-56 mx-auto mb-8"></canvas>
 
             <h3 class="text-xl font-semibold mb-4">
@@ -277,16 +322,26 @@
             <h3 class="text-xl font-semibold mb-4">Friends</h3>
             <ul class="space-y-4">
               <li class="flex items-center gap-4">
-                <img src="https://i.pravatar.cc/40?u=a" class="w-10 h-10 rounded-full" />
+                <img
+                  src="https://i.pravatar.cc/40?u=a"
+                  class="w-10 h-10 rounded-full"
+                />
                 <span class="flex-1">Aya</span>
-                <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
+                <button
+                  class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white"
+                >
                   Challenge
                 </button>
               </li>
               <li class="flex items-center gap-4">
-                <img src="https://i.pravatar.cc/40?u=b" class="w-10 h-10 rounded-full" />
+                <img
+                  src="https://i.pravatar.cc/40?u=b"
+                  class="w-10 h-10 rounded-full"
+                />
                 <span class="flex-1">Karim</span>
-                <button class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white">
+                <button
+                  class="text-xs px-3 py-1 rounded-full bg-amber-500 text-white"
+                >
                   Challenge
                 </button>
               </li>
@@ -330,43 +385,53 @@
         <!-- 2 × 2 grid of mode cards (original layout) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- vs AI -->
-          <button data-mode="ai"
-                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                         bg-white/10 hover:bg-white/15 transition"
+          <button
+            data-mode="ai"
+            class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl bg-white/10 hover:bg-white/15 transition"
           >
             <span class="text-5xl">🤖</span>
             <span class="text-lg font-semibold">Vs&nbsp;AI</span>
-            <p class="text-xs text-white/70 text-center">Practice against the computer</p>
+            <p class="text-xs text-white/70 text-center">
+              Practice against the computer
+            </p>
           </button>
 
           <!-- offline 1-on-1 -->
-          <button data-mode="offline"
-                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                         bg-white/10 hover:bg-white/15 transition"
+          <button
+            data-mode="offline"
+            class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl bg-white/10 hover:bg-white/15 transition"
           >
             <span class="text-5xl">🎮</span>
-            <span class="text-lg font-semibold">1&nbsp;v&nbsp;1&nbsp;(offline)</span>
-            <p class="text-xs text-white/70 text-center">Two players on the same device</p>
+            <span class="text-lg font-semibold"
+              >1&nbsp;v&nbsp;1&nbsp;(offline)</span
+            >
+            <p class="text-xs text-white/70 text-center">
+              Two players on the same device
+            </p>
           </button>
 
           <!-- remote -->
-          <button data-mode="remote"
-                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                         bg-white/10 hover:bg-white/15 transition"
+          <button
+            data-mode="remote"
+            class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl bg-white/10 hover:bg-white/15 transition"
           >
             <span class="text-5xl">🌐</span>
             <span class="text-lg font-semibold">Remote&nbsp;Play</span>
-            <p class="text-xs text-white/70 text-center">Invite a friend or join matchmaking</p>
+            <p class="text-xs text-white/70 text-center">
+              Invite a friend or join matchmaking
+            </p>
           </button>
 
           <!-- tournament -->
-          <button data-mode="tournament"
-                  class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl
-                         bg-white/10 hover:bg-white/15 transition"
+          <button
+            data-mode="tournament"
+            class="mode-card flex flex-col items-center gap-3 p-6 rounded-2xl bg-white/10 hover:bg-white/15 transition"
           >
             <span class="text-5xl">🏆</span>
             <span class="text-lg font-semibold">Tournament</span>
-            <p class="text-xs text-white/70 text-center">Bracket-style knockout fun</p>
+            <p class="text-xs text-white/70 text-center">
+              Bracket-style knockout fun
+            </p>
           </button>
         </div>
       </div>
@@ -424,7 +489,6 @@
     </div>
 
     <!-- MODE-CARD & DIFFICULTY STYLES (unchanged) -->
-    
 
     <!-- compiled scripts -->
     <script type="module" src="./dist/nav.js"></script>
