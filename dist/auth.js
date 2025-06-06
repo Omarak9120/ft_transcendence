@@ -41,8 +41,6 @@ function validatePassword(pw) {
         return "Password needs at least one capital letter.";
     if (!/\d/.test(pw))
         return "Password needs at least one number.";
-    if (!/gay/i.test(pw))
-        return 'Password must include the word "gay".';
     return null;
 }
 /* ─── initial state ─── */
@@ -51,20 +49,38 @@ isAuthed() ? hideLogin() : showLogin();
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     loginError.textContent = "";
-    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password")
         .value;
     const pwErr = validatePassword(password);
-    if (!username)
-        loginError.textContent = "Username is required.";
+    if (!email)
+        loginError.textContent = "Email is required.";
     else if (pwErr)
         loginError.textContent = pwErr;
     else {
-        hideLogin();
-        resetObjects();
-        resizeCanvas();
-        render();
-        updateScore();
+        fetch("http://localhost:3000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }) // 👈 you may want to rename `username` to `email` in your form too
+        })
+            .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) {
+                loginError.textContent = data.error || "Login failed.";
+            }
+            else {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                hideLogin();
+                resetObjects();
+                resizeCanvas();
+                render();
+                updateScore();
+            }
+        })
+            .catch((err) => {
+            console.error(err);
+            loginError.textContent = "Network error. Please try again.";
+        });
     }
 });
 /* Forgot-password stub */
@@ -99,8 +115,25 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
     else if (pw !== pw2)
         signupError.textContent = "Passwords don’t match.";
     else {
-        hideSignup(); // mock success – just return to login screen
-        loginError.textContent = "Account created! Please sign in.";
+        fetch("http://localhost:3000/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: un, email: em, password: pw })
+        })
+            .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) {
+                signupError.textContent = data.error || "Signup failed.";
+            }
+            else {
+                hideSignup();
+                loginError.textContent = "Account created! Please sign in.";
+            }
+        })
+            .catch((err) => {
+            console.error(err);
+            signupError.textContent = "Network error. Please try again.";
+        });
     }
 });
 /* ─── sign-out via navbar ─── */
