@@ -10,12 +10,26 @@ export interface GoalsTotalDTO {
   conceded: number;
 }
 
-export interface MonthlyGoalsDTO {
-  scored: number[];
-  conceded: number[];
+/* Array [12] used only for old mock data */
+export interface MonthlyNumsDTO extends Array<number> {}
+
+/* New – monthly win-rate payload  */
+export interface MonthlyWinRateDTO {
+  month: string;    // "Jul", …
+  winRate: number;  // 0-100
 }
 
-export interface MonthlyNumsDTO extends Array<number> {} // e.g. wins per month
+/* New – monthly goals payload */
+export interface MonthlyGoalsRowDTO {
+  month: string;
+  scored: number;
+  conceded: number;
+}
+
+export interface MonthlyGoalsDTO {
+  scored: number[];       // still used for mock mode
+  conceded: number[];
+}
 
 export interface StreakDTO {
   streak: number;

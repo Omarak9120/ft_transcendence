@@ -5,7 +5,7 @@ import db from '../utils/db';
 export default async function statsRoutes(fastify: FastifyInstance) {
   // 1. /api/stats/wins — lifetime wins and losses
   fastify.get('/api/stats/wins', async (req, reply) => {
-    const userId = 2; // replace with real session later
+    const userId = 7; // replace with real session later
 
     const totalGamesStmt = db.prepare(`
       SELECT COUNT(*) AS total FROM matches
@@ -25,7 +25,7 @@ export default async function statsRoutes(fastify: FastifyInstance) {
 
   // 2. /api/stats/monthly-wins — wins per month for the past year
   fastify.get('/api/stats/monthly-wins', async (req, reply) => {
-  const userId = 2; // static for now
+  const userId = 7; // static for now
   const result: { month: string; winRate: number }[] = [];
 
   const now = new Date();
@@ -61,7 +61,7 @@ export default async function statsRoutes(fastify: FastifyInstance) {
 //for all time goals scored/conceded
 
 fastify.get('/api/stats/goals', async (req, reply) => {
-  const userId = 2; // static for now
+  const userId = 7; // static for now
 
   const rows = db.prepare(`
     SELECT
@@ -93,7 +93,7 @@ fastify.get('/api/stats/goals', async (req, reply) => {
 //for monthly goals scored/conceded
 
 fastify.get('/api/stats/monthly-goals', async (req, reply) => {
-  const userId = 2; // static for now
+  const userId = 7; // static for now
   const now = new Date();
   const result: { month: string; scored: number; conceded: number }[] = [];
 
