@@ -116,7 +116,7 @@ export default async function matchRoutes(fastify: FastifyInstance) {
 
   //for history
   fastify.get('/api/matches/history', async (req, reply) => {
-  const userId = 2; // Replace this later with real session logic
+  const userId = 7; // Replace this later with real session logic
 
   const rows = db.prepare(`
     SELECT
