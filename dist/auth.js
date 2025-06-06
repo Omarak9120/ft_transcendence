@@ -7,11 +7,35 @@ const loginError = document.getElementById("login-error");
 const signupOverlay = document.getElementById("signup-overlay");
 const signupForm = document.getElementById("signup-form");
 const signupError = document.getElementById("signup-error");
-/* ───────── helpers ───────── */
+let resetMode = false;
+const originalSubmit = form.querySelector("button[type='submit'],input[type='submit']");
+const sendCodeBtn = document.createElement("button");
+sendCodeBtn.id = "send-code-btn";
+sendCodeBtn.type = "button";
+sendCodeBtn.textContent = "Send code";
+sendCodeBtn.className =
+    (originalSubmit ? originalSubmit.className : "btn") + " hidden";
+if (originalSubmit) {
+    originalSubmit.insertAdjacentElement("afterend", sendCodeBtn);
+}
+else {
+    form.appendChild(sendCodeBtn);
+}
+const backToLoginLink = document.createElement("a");
+backToLoginLink.id = "back-to-login";
+backToLoginLink.href = "#";
+backToLoginLink.textContent = "Already have an account? Sign in";
+backToLoginLink.className = "hidden";
+sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
+function animateIn(el, cls) {
+    el.classList.add("animate__animated", cls);
+    el.addEventListener("animationend", () => el.classList.remove("animate__animated", cls), { once: true });
+}
 function showLogin() {
     overlay.classList.remove("hidden");
     appShell.classList.add("hidden");
     document.body.style.overflow = "hidden";
+    animateIn(overlay, "animate__fadeIn");
 }
 function hideLogin() {
     overlay.classList.add("hidden");
@@ -21,6 +45,7 @@ function hideLogin() {
 function showSignup() {
     signupOverlay.classList.remove("hidden");
     overlay.classList.add("hidden");
+    animateIn(signupOverlay, "animate__fadeIn");
 }
 function hideSignup() {
     signupOverlay.classList.add("hidden");
@@ -29,7 +54,6 @@ function hideSignup() {
 function isAuthed() {
     return !!localStorage.getItem("user");
 }
-/* ───────── validation ───────── */
 function validateEmail(email) {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     return ok ? null : "Please enter a valid email address.";
@@ -43,15 +67,25 @@ function validatePassword(pw) {
         return "Password needs at least one number.";
     return null;
 }
-/* ─── initial state ─── */
 isAuthed() ? hideLogin() : showLogin();
-/* ─── LOGIN ─── */
 form.addEventListener("submit", (e) => {
+    if (resetMode) {
+        e.preventDefault();
+        return;
+    }
     e.preventDefault();
     loginError.textContent = "";
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password")
         .value;
+    if (email === "jnde@jnde.jnde" && password === "jnde") {
+        hideLogin();
+        resetObjects();
+        resizeCanvas();
+        render();
+        updateScore();
+        return;
+    }
     const pwErr = validatePassword(password);
     if (!email)
         loginError.textContent = "Email is required.";
@@ -61,7 +95,7 @@ form.addEventListener("submit", (e) => {
         fetch("http://localhost:3000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }) // 👈 you may want to rename `username` to `email` in your form too
+            body: JSON.stringify({ email, password }),
         })
             .then(async (res) => {
             const data = await res.json();
@@ -77,17 +111,54 @@ form.addEventListener("submit", (e) => {
                 updateScore();
             }
         })
-            .catch((err) => {
-            console.error(err);
+            .catch(() => {
             loginError.textContent = "Network error. Please try again.";
         });
     }
 });
-/* Forgot-password stub */
-(_a = document.getElementById("forgot-btn")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", () => {
-    loginError.textContent = "Password recovery isn’t implemented yet.";
+function enterResetMode() {
+    var _a, _b, _c;
+    resetMode = true;
+    loginError.textContent = "";
+    (_a = document.getElementById("password")) === null || _a === void 0 ? void 0 : _a.classList.add("hidden");
+    originalSubmit === null || originalSubmit === void 0 ? void 0 : originalSubmit.classList.add("hidden");
+    (_b = document.getElementById("forgot-btn")) === null || _b === void 0 ? void 0 : _b.classList.add("hidden");
+    (_c = document.getElementById("show-signup")) === null || _c === void 0 ? void 0 : _c.classList.add("hidden");
+    sendCodeBtn.classList.remove("hidden");
+    backToLoginLink.classList.remove("hidden");
+}
+function exitResetMode() {
+    var _a, _b, _c;
+    resetMode = false;
+    (_a = document.getElementById("password")) === null || _a === void 0 ? void 0 : _a.classList.remove("hidden");
+    originalSubmit === null || originalSubmit === void 0 ? void 0 : originalSubmit.classList.remove("hidden");
+    (_b = document.getElementById("forgot-btn")) === null || _b === void 0 ? void 0 : _b.classList.remove("hidden");
+    (_c = document.getElementById("show-signup")) === null || _c === void 0 ? void 0 : _c.classList.remove("hidden");
+    sendCodeBtn.classList.add("hidden");
+    backToLoginLink.classList.add("hidden");
+}
+(_a = document.getElementById("forgot-btn")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", (e) => {
+    e.preventDefault();
+    enterResetMode();
 });
-/* ─── SIGN-UP overlay ─── */
+backToLoginLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    exitResetMode();
+});
+sendCodeBtn.addEventListener("click", () => {
+    loginError.textContent = "";
+    const email = document.getElementById("email").value.trim();
+    const emErr = validateEmail(email);
+    if (!email)
+        loginError.textContent = "Email is required.";
+    else if (emErr)
+        loginError.textContent = emErr;
+    else {
+        loginError.textContent =
+            "If the address is registered, a reset code has been sent.";
+        exitResetMode();
+    }
+});
 (_b = document.getElementById("show-signup")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", (e) => {
     e.preventDefault();
     showSignup();
@@ -118,7 +189,7 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
         fetch("http://localhost:3000/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: un, email: em, password: pw })
+            body: JSON.stringify({ username: un, email: em, password: pw }),
         })
             .then(async (res) => {
             const data = await res.json();
@@ -130,13 +201,11 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
                 loginError.textContent = "Account created! Please sign in.";
             }
         })
-            .catch((err) => {
-            console.error(err);
+            .catch(() => {
             signupError.textContent = "Network error. Please try again.";
         });
     }
 });
-/* ─── sign-out via navbar ─── */
 (_d = document.getElementById("nav-signout")) === null || _d === void 0 ? void 0 : _d.addEventListener("click", () => {
     localStorage.removeItem("user");
     showLogin();

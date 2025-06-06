@@ -12,8 +12,8 @@
 import { MatchRow } from "./types.js";
 
 /* Endpoint */
-const API_BASE  = "http://localhost:3000";
-const ENDPOINT  = `${API_BASE}/api/matches/history`;
+const API_BASE = "http://localhost:3000";
+const ENDPOINT = `${API_BASE}/api/matches/history`;
 
 /* One-time guard */
 let loaded = false;
@@ -40,14 +40,16 @@ export async function initHistoryTab(): Promise<void> {
 /* ------- helper ------- */
 
 function renderRows(rows: MatchRow[]): void {
-  const tbody = document.getElementById("history-body") as HTMLTableSectionElement;
+  const tbody = document.getElementById(
+    "history-body"
+  ) as HTMLTableSectionElement;
   if (!tbody) return;
 
-  tbody.innerHTML = "";                // clear existing rows
+  tbody.innerHTML = ""; // clear existing rows
 
   rows.forEach((row, i) => {
     const tr = document.createElement("tr");
-    if (i % 2) tr.className = "bg-white/5";       // zebra striping
+    if (i % 2) tr.className = "bg-white/5"; // zebra striping
 
     tr.innerHTML = `
       <td class="py-2">${row.id}</td>

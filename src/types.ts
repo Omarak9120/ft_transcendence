@@ -15,8 +15,8 @@ export interface MonthlyNumsDTO extends Array<number> {}
 
 /* New – monthly win-rate payload  */
 export interface MonthlyWinRateDTO {
-  month: string;    // "Jul", …
-  winRate: number;  // 0-100
+  month: string; // "Jul", …
+  winRate: number; // 0-100
 }
 
 /* New – monthly goals payload */
@@ -27,7 +27,7 @@ export interface MonthlyGoalsRowDTO {
 }
 
 export interface MonthlyGoalsDTO {
-  scored: number[];       // still used for mock mode
+  scored: number[]; // still used for mock mode
   conceded: number[];
 }
 
@@ -46,8 +46,8 @@ export interface TrophyDTO {
 
 export interface MatchRow {
   id: string;
-  date: string;       // ISO yyyy-mm-dd
+  date: string; // ISO yyyy-mm-dd
   opponent: string;
-  score: string;      // “11 – 8”
+  score: string; // “11 – 8”
   result: "Win" | "Loss";
 }

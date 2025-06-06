@@ -1,121 +1,134 @@
-/**
- * nav.ts – SPA navbar, overlays, tabs, “Play → Difficulty” logic
- * Strict-mode TypeScript
- */
-
 import { initStatsTab } from "./stats.js";
 import { initHistoryTab } from "./history.js";
+import "./welcome.js"; // hero / “Play Now” section
 
-/* ── shorthand for querySelector ───────────────── */
+/* ── query helper ─────────────────────────── */
 const $ = <T extends HTMLElement = HTMLElement>(sel: string) =>
   document.querySelector<T>(sel);
 
-/* grab nav-menu once so we reuse it everywhere */
+/* ── constants ────────────────────────────── */
 const navMenu = $("#nav-menu");
-
-/* ── breakpoints & helper lists ────────────────── */
+const BURGER = $("#burger");
 const MOBILE_BP = 640;
 
-/**
- * Tailwind classes applied **only** while the burger-menu is open
- * below the `sm` breakpoint.  The two “inset” classes make the
- * dropdown span the entire viewport width, centred under the bar.
- */
-const MOBILE_DROPDOWN: readonly string[] = [
+/* mobile dropdown classes */
+const DROP = [
   "flex",
   "flex-col",
   "absolute",
   "left-0",
   "right-0",
-  "top-16", // sits just under the 4-rem-tall navbar
-  "w-screen", // full viewport width
-  "bg-black/90",
+  "top-16",
+  "w-screen",
   "space-y-4",
   "items-center",
   "py-4",
-];
+  "bg-violet-950/95", // new colour
+] as const;
 
-/* small helper so we’re not repeating loops */
-function setMobileDropdown(enabled: boolean) {
-  if (!navMenu) return;
-  MOBILE_DROPDOWN.forEach((cls) =>
-    navMenu.classList[enabled ? "add" : "remove"](cls)
+/* ── tiny animation helpers ───────────────── */
+function fadeIn(el: HTMLElement) {
+  el.classList.add("animate__animated", "animate__fadeIn", "animate__faster");
+  el.addEventListener(
+    "animationend",
+    () =>
+      el.classList.remove(
+        "animate__animated",
+        "animate__fadeIn",
+        "animate__faster"
+      ),
+    { once: true }
+  );
+}
+function fadeOut(el: HTMLElement, done: () => void) {
+  el.classList.add("animate__animated", "animate__fadeOut", "animate__faster");
+  el.addEventListener(
+    "animationend",
+    () => {
+      el.classList.remove(
+        "animate__animated",
+        "animate__fadeOut",
+        "animate__faster"
+      );
+      done();
+    },
+    { once: true }
   );
 }
 
-/* ── handle resize so the menu never gets “stuck” ── */
-function onResize() {
+/* ── dropdown helpers ─────────────────────── */
+function applyMobileStyles(on: boolean) {
   if (!navMenu) return;
-
-  if (window.innerWidth >= MOBILE_BP) {
-    /* back to desktop: always visible & horizontal */
-    navMenu.classList.remove("hidden");
-    setMobileDropdown(false);
-  } else {
-    /* back to mobile: keep dropdown classes only while open */
-    if (navMenu.classList.contains("hidden")) setMobileDropdown(false);
-  }
+  DROP.forEach((c) => navMenu.classList[on ? "add" : "remove"](c));
 }
-window.addEventListener("resize", onResize);
-onResize(); // run immediately
 
-/* ── burger-menu toggle ─────────────────────────── */
-$("#burger")?.addEventListener("click", () => {
+/* open / close menu (used by burger + item clicks) */
+function openMenu() {
   if (!navMenu) return;
+  navMenu.classList.remove("hidden");
+  applyMobileStyles(true);
+  fadeIn(navMenu);
+}
+function closeMenu() {
+  if (!navMenu) return;
+  fadeOut(navMenu, () => {
+    applyMobileStyles(false);
+    navMenu!.classList.add("hidden");
+  });
+}
 
-  const willOpen = navMenu.classList.contains("hidden");
-  navMenu.classList.toggle("hidden");
-
-  if (window.innerWidth < MOBILE_BP) setMobileDropdown(willOpen);
+/* ── burger toggle ────────────────────────── */
+BURGER?.addEventListener("click", () => {
+  if (!navMenu) return;
+  const isOpen = !navMenu.classList.contains("hidden");
+  isOpen ? closeMenu() : openMenu();
 });
 
-/* auto-close dropdown after any link tap on mobile */
+/* auto-close after clicking a nav item on mobile */
 navMenu?.querySelectorAll("button").forEach((btn) =>
   btn.addEventListener("click", () => {
     if (
-      window.innerWidth < MOBILE_BP &&
-      !navMenu!.classList.contains("hidden")
-    ) {
-      $("#burger")?.dispatchEvent(new Event("click"));
-    }
+      innerWidth < MOBILE_BP &&
+      navMenu &&
+      !navMenu.classList.contains("hidden")
+    )
+      closeMenu();
   })
 );
 
-/* ── SIGN-OUT button — stub ─────────────────────── */
-$("#nav-signout")?.addEventListener("click", async () => {
-  // plug real logout endpoint here
-  alert("Signed out 👍");
-});
+/* ── handle viewport resize ───────────────── */
+function onResize() {
+  if (!navMenu) return;
 
-/* ── small helpers for the various overlays ─────── */
-function showOverlay(el: HTMLElement, inner?: HTMLElement) {
-  el.classList.remove("hidden");
-  requestAnimationFrame(() => {
-    el.classList.remove("opacity-0");
-    if (inner) inner.classList.remove("scale-90");
-  });
+  /* Desktop ≥ MOBILE_BP */
+  if (innerWidth >= MOBILE_BP) {
+    navMenu.classList.remove("hidden"); // keep top-bar visible
+    applyMobileStyles(false); // strip mobile classes if any
+
+    /* Mobile < MOBILE_BP */
+  } else {
+    if (navMenu.classList.contains("hidden")) {
+      /* menu closed → keep mobile classes off */
+      applyMobileStyles(false);
+    } else {
+      /* menu already open → ensure correct mobile styling */
+      applyMobileStyles(true);
+    }
+  }
 }
-function hideOverlay(el: HTMLElement, inner?: HTMLElement) {
-  if (inner) inner.classList.add("scale-90");
-  el.classList.add("opacity-0");
-  setTimeout(() => el.classList.add("hidden"), 300);
-}
+addEventListener("resize", onResize);
+onResize(); // run once at load
 
-/* ─────────────────────────────────────────────── *
- * Everything below here is unchanged
- * (tabs, profile overlay, play dialogs, etc.)
- * ─────────────────────────────────────────────── */
-
+/* ────────────────────────────────────────────
+ * PROFILE overlay & tabs
+ * ────────────────────────────────────────── */
 const profile = $("#profile-overlay")!;
 $("#nav-profile")?.addEventListener("click", () => {
   showOverlay(profile);
-  repositionUnderline();
+  updateUnderline();
 });
 $("#profile-close")?.addEventListener("click", () => hideOverlay(profile));
-
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") hideOverlay(profile);
-});
+addEventListener("keydown", (e) => e.key === "Escape" && hideOverlay(profile));
 
 $("#avatar-input")?.addEventListener("change", (ev) => {
   const f = (ev.currentTarget as HTMLInputElement).files?.[0];
@@ -126,45 +139,82 @@ const tabBtns = document.querySelectorAll<HTMLButtonElement>(
   "#profile-tabs .tab-btn"
 );
 const panels = document.querySelectorAll<HTMLElement>("#tab-panels .panel");
-const line = $("#tab-underline")!;
+const underline = $("#tab-underline")!;
 
 tabBtns.forEach((btn) =>
   btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
+    /* activate button */
     tabBtns.forEach((b) => {
       b.classList.toggle("text-white", b === btn);
       b.classList.toggle("text-white/70", b !== btn);
     });
-    line.style.width = `${btn.offsetWidth}px`;
-    line.style.transform = `translateX(${btn.offsetLeft}px)`;
+    /* move underline */
+    underline.style.width = `${btn.offsetWidth}px`;
+    underline.style.transform = `translateX(${btn.offsetLeft}px)`;
+    /* switch panel */
     panels.forEach((p) =>
-      p.classList.toggle("hidden", p.dataset.panel !== target)
+      p.classList.toggle("hidden", p.dataset.panel !== btn.dataset.tab)
     );
-    if (target === "stats") initStatsTab();
-    if (target === "history") initHistoryTab();
+    if (btn.dataset.tab === "stats") initStatsTab();
+    if (btn.dataset.tab === "history") initHistoryTab();
   })
 );
-
-function repositionUnderline() {
+function updateUnderline() {
   const active = document.querySelector<HTMLButtonElement>(
     "#profile-tabs .tab-btn.text-white"
   );
   if (active) {
-    line.style.width = `${active.offsetWidth}px`;
-    line.style.transform = `translateX(${active.offsetLeft}px)`;
+    underline.style.width = `${active.offsetWidth}px`;
+    underline.style.transform = `translateX(${active.offsetLeft}px)`;
   }
 }
-window.addEventListener("resize", repositionUnderline);
+addEventListener("resize", updateUnderline);
 
+/* ────────────────────────────────────────────
+ * Generic overlay helpers (used by Play → Difficulty)
+ * ────────────────────────────────────────── */
+function showOverlay(el: HTMLElement, inner?: HTMLElement) {
+  el.classList.remove(
+    "hidden",
+    "opacity-0",
+    "animate__fadeOut",
+    "animate__animated"
+  );
+  if (inner) inner.classList.remove("scale-90");
+  el.classList.add("opacity-0"); // start transparent
+  requestAnimationFrame(() => {
+    el.classList.add("animate__animated", "animate__fadeIn");
+    el.classList.remove("opacity-0");
+  });
+}
+function hideOverlay(el: HTMLElement, inner?: HTMLElement) {
+  if (el.classList.contains("hidden")) return;
+  el.classList.remove("animate__fadeIn");
+  el.classList.add("animate__fadeOut");
+  if (inner) inner.classList.add("scale-90");
+  el.addEventListener(
+    "animationend",
+    () => {
+      el.classList.add("hidden", "opacity-0");
+      el.classList.remove("animate__animated", "animate__fadeOut");
+    },
+    { once: true }
+  );
+}
+
+/* ────────────────────────────────────────────
+ * PLAY → Difficulty flow
+ * ────────────────────────────────────────── */
 const playOverlay = $("#play-overlay")!;
 $("#nav-play")?.addEventListener("click", () => showOverlay(playOverlay));
 $("#play-close")?.addEventListener("click", () => hideOverlay(playOverlay));
+addEventListener(
+  "keydown",
+  (e) => e.key === "Escape" && hideOverlay(playOverlay)
+);
 
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") hideOverlay(playOverlay);
-});
-
-document.querySelectorAll<HTMLButtonElement>(".mode-card").forEach((card) => {
+/* choose game mode */
+document.querySelectorAll<HTMLButtonElement>(".mode-card").forEach((card) =>
   card.addEventListener("click", () => {
     const mode = card.dataset.mode as
       | "ai"
@@ -180,26 +230,28 @@ document.querySelectorAll<HTMLButtonElement>(".mode-card").forEach((card) => {
     } else {
       alert(`Mode “${mode}” coming soon!`);
     }
-  });
-});
-
-const diffOverlay = $("#difficulty-overlay")!;
-const diffContainer = $("#difficulty-container")!;
-$("#difficulty-close")?.addEventListener("click", () =>
-  hideOverlay(diffOverlay, diffContainer)
+  })
 );
 
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") hideOverlay(diffOverlay, diffContainer);
-});
+/* difficulty dialog */
+const diffOv = $("#difficulty-overlay")!;
+const diffBox = $("#difficulty-container")!;
+$("#difficulty-close")?.addEventListener("click", () =>
+  hideOverlay(diffOv, diffBox)
+);
+addEventListener(
+  "keydown",
+  (e) => e.key === "Escape" && hideOverlay(diffOv, diffBox)
+);
 
-document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {
+/* choose difficulty */
+document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) =>
   btn.addEventListener("click", () => {
     const diff = btn.dataset.diff as "easy" | "medium" | "hard";
-    hideOverlay(diffOverlay, diffContainer);
+    hideOverlay(diffOv, diffBox);
 
     const rate = diff === "easy" ? 1.0 : diff === "medium" ? 0.5 : 0.01;
     window.setAIRefresh(rate);
     window.setGameMode("ai");
-  });
-});
+  })
+);

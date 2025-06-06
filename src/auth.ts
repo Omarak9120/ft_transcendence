@@ -9,11 +9,45 @@ const signupOverlay = document.getElementById("signup-overlay") as HTMLElement;
 const signupForm = document.getElementById("signup-form") as HTMLFormElement;
 const signupError = document.getElementById("signup-error") as HTMLElement;
 
-/* ───────── helpers ───────── */
+let resetMode = false;
+
+const originalSubmit = form.querySelector(
+  "button[type='submit'],input[type='submit']"
+) as HTMLElement | null;
+
+const sendCodeBtn = document.createElement("button");
+sendCodeBtn.id = "send-code-btn";
+sendCodeBtn.type = "button";
+sendCodeBtn.textContent = "Send code";
+sendCodeBtn.className =
+  (originalSubmit ? originalSubmit.className : "btn") + " hidden";
+if (originalSubmit) {
+  originalSubmit.insertAdjacentElement("afterend", sendCodeBtn);
+} else {
+  form.appendChild(sendCodeBtn);
+}
+
+const backToLoginLink = document.createElement("a");
+backToLoginLink.id = "back-to-login";
+backToLoginLink.href = "#";
+backToLoginLink.textContent = "Already have an account? Sign in";
+backToLoginLink.className = "hidden";
+sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
+
+function animateIn(el: HTMLElement, cls: string) {
+  el.classList.add("animate__animated", cls);
+  el.addEventListener(
+    "animationend",
+    () => el.classList.remove("animate__animated", cls),
+    { once: true }
+  );
+}
+
 function showLogin() {
   overlay.classList.remove("hidden");
   appShell.classList.add("hidden");
   document.body.style.overflow = "hidden";
+  animateIn(overlay, "animate__fadeIn");
 }
 function hideLogin() {
   overlay.classList.add("hidden");
@@ -23,6 +57,7 @@ function hideLogin() {
 function showSignup() {
   signupOverlay.classList.remove("hidden");
   overlay.classList.add("hidden");
+  animateIn(signupOverlay, "animate__fadeIn");
 }
 function hideSignup() {
   signupOverlay.classList.add("hidden");
@@ -32,7 +67,6 @@ function isAuthed(): boolean {
   return !!localStorage.getItem("user");
 }
 
-/* ───────── validation ───────── */
 function validateEmail(email: string): string | null {
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   return ok ? null : "Please enter a valid email address.";
@@ -44,11 +78,13 @@ function validatePassword(pw: string): string | null {
   return null;
 }
 
-/* ─── initial state ─── */
 isAuthed() ? hideLogin() : showLogin();
 
-/* ─── LOGIN ─── */
 form.addEventListener("submit", (e) => {
+  if (resetMode) {
+    e.preventDefault();
+    return;
+  }
   e.preventDefault();
   loginError.textContent = "";
 
@@ -65,7 +101,7 @@ form.addEventListener("submit", (e) => {
     fetch("http://localhost:3000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }) // 👈 you may want to rename `username` to `email` in your form too
+      body: JSON.stringify({ email, password }),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -80,20 +116,64 @@ form.addEventListener("submit", (e) => {
           updateScore();
         }
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         loginError.textContent = "Network error. Please try again.";
       });
   }
-
 });
 
-/* Forgot-password stub */
-document.getElementById("forgot-btn")?.addEventListener("click", () => {
-  loginError.textContent = "Password recovery isn’t implemented yet.";
+function enterResetMode() {
+  resetMode = true;
+  loginError.textContent = "";
+  (document.getElementById("password") as HTMLElement)?.classList.add("hidden");
+  originalSubmit?.classList.add("hidden");
+  (document.getElementById("forgot-btn") as HTMLElement)?.classList.add(
+    "hidden"
+  );
+  document.getElementById("show-signup")?.classList.add("hidden");
+  sendCodeBtn.classList.remove("hidden");
+  backToLoginLink.classList.remove("hidden");
+}
+function exitResetMode() {
+  resetMode = false;
+  (document.getElementById("password") as HTMLElement)?.classList.remove(
+    "hidden"
+  );
+  originalSubmit?.classList.remove("hidden");
+  (document.getElementById("forgot-btn") as HTMLElement)?.classList.remove(
+    "hidden"
+  );
+  document.getElementById("show-signup")?.classList.remove("hidden");
+  sendCodeBtn.classList.add("hidden");
+  backToLoginLink.classList.add("hidden");
+}
+
+document.getElementById("forgot-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  enterResetMode();
 });
 
-/* ─── SIGN-UP overlay ─── */
+backToLoginLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  exitResetMode();
+});
+
+sendCodeBtn.addEventListener("click", () => {
+  loginError.textContent = "";
+  const email = (
+    document.getElementById("email") as HTMLInputElement
+  ).value.trim();
+  const emErr = validateEmail(email);
+
+  if (!email) loginError.textContent = "Email is required.";
+  else if (emErr) loginError.textContent = emErr;
+  else {
+    loginError.textContent =
+      "If the address is registered, a reset code has been sent.";
+    exitResetMode();
+  }
+});
+
 document.getElementById("show-signup")?.addEventListener("click", (e) => {
   e.preventDefault();
   showSignup();
@@ -128,7 +208,7 @@ signupForm?.addEventListener("submit", (e) => {
     fetch("http://localhost:3000/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: un, email: em, password: pw })
+      body: JSON.stringify({ username: un, email: em, password: pw }),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -139,15 +219,12 @@ signupForm?.addEventListener("submit", (e) => {
           loginError.textContent = "Account created! Please sign in.";
         }
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         signupError.textContent = "Network error. Please try again.";
       });
   }
-
 });
 
-/* ─── sign-out via navbar ─── */
 document.getElementById("nav-signout")?.addEventListener("click", () => {
   localStorage.removeItem("user");
   showLogin();

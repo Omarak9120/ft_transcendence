@@ -76,16 +76,30 @@ window.addEventListener("resize", resizeCanvas);
 
 //handling input (w, s, arrow up and arrow down)
 const keys: Record<string, boolean> = {};
+
+/* key listeners for W/S and ArrowUp/ArrowDown */
 for (const type of ["keydown", "keyup"] as const) {
   window.addEventListener(type, (evt: Event) => {
     const e = evt as KeyboardEvent;
     if (!["w", "s", "ArrowUp", "ArrowDown"].includes(e.key)) return;
-    e.preventDefault();
-    keys[e.key] = type === "keydown";
+
+    // ✨ Allow typing in login / sign-up forms: skip if an editable element has focus
+    const active = document.activeElement as HTMLElement | null;
+    if (
+      active &&
+      (["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName) ||
+        active.isContentEditable)
+    ) {
+      return; // let the form handle the keystroke
+    }
+
+    e.preventDefault(); // only preventDefault for gameplay
+    keys[e.key] = type === "keydown"; // store the key state
   });
 }
 
-//to keep the ball and the paddle on board
+/* ---------- REST OF THE GAME ENGINE  (unchanged) ---------------------- */
+
 const clamp = (v: number, lo: number, hi: number) => {
   if (v < lo) return lo;
   if (v > hi) return hi;
