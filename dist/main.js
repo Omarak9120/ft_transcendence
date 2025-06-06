@@ -1,3 +1,4 @@
+//export {}; //this will treat this file as a module and not global script
 const GAME_SPEED = 1.25; //all game speed
 const BALL_SPEED_PX = 330; //ball speed b px/s
 const PADDLE_FR = 0.45; //paddle speed height / s
@@ -393,4 +394,4 @@ function handleWin() {
         requestAnimationFrame(loop);
     };
 }
-export {};
+export { resetObjects, resizeCanvas, render, updateScore };

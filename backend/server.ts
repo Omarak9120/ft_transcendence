@@ -5,6 +5,7 @@ import loginRoutes from './routes/login';
 import matchRoutes from './routes/match';
 import statsRoutes from './routes/stats';
 import userRoutes from './routes/user';
+import userFriends from './routes/friends';
 
 const fastify = Fastify({ logger: true });
 
@@ -20,7 +21,8 @@ const start = async () => {
     await fastify.register(matchRoutes);
     await fastify.register(statsRoutes);
     await fastify.register(userRoutes);
-
+    await fastify.register(userFriends);
+    
     await fastify.listen({ port: 3000 });
     console.log('Server started on http://localhost:3000');
   } catch (err) {

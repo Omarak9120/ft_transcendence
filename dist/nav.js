@@ -69,10 +69,10 @@ navMenu === null || navMenu === void 0 ? void 0 : navMenu.querySelectorAll("butt
         (_a = $("#burger")) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
     }
 }));
+
 /* ── SIGN-OUT button — stub ─────────────────────── */
 (_b = $("#nav-signout")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", async () => {
-    // plug real logout endpoint here
-    alert("Signed out 👍");
+    alert("gonfle le");
 });
 /* ── small helpers for the various overlays ─────── */
 function showOverlay(el, inner) {
