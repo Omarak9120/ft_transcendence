@@ -19,9 +19,7 @@ const ENDPOINT = `${API_BASE}/api/matches/history`;
 let loaded = false;
 
 function getAuthHeader(): HeadersInit {
-  console.log("HERE2\n");
   const token = localStorage.getItem('token');
-  console.log("HERE1 " + token + "\n");
   return {
     'Content-Type': 'application/json',
     'Authorization': token ? `Bearer ${token}` : ''

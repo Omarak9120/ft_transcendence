@@ -34,6 +34,9 @@ backToLoginLink.textContent = "Already have an account? Sign in";
 backToLoginLink.className = "hidden";
 sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
 
+const $ = <T extends HTMLElement = HTMLElement>(sel: string) =>
+  document.querySelector<T>(sel);
+
 function animateIn(el: HTMLElement, cls: string) {
   el.classList.add("animate__animated", cls);
   el.addEventListener(
@@ -67,20 +70,12 @@ function isAuthed(): boolean {
   return !!localStorage.getItem('token');
 }
 
-export function test()
-{
-	console.log("TESTTTT\n");
+function showLoginToast() {
+  const t = $("#login-toast")!;
+  console.log(t);
+  t.style.opacity = "1";
+  setTimeout(() => (t.style.opacity = "0"), 2000);
 }
-
-// export function getAuthHeader(): HeadersInit {
-//   console.log("HERE2\n");
-//   const token = localStorage.getItem('token');
-//   console.log("HERE1 " + token + "\n");
-//   return {
-//     'Content-Type': 'application/json',
-//     'Authorization': token ? `Bearer ${token}` : ''
-//   };
-// }
 
 function validateEmail(email: string): string | null {
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -131,6 +126,14 @@ form.addEventListener("submit", (e) => {
           resizeCanvas();
           render();
           updateScore();
+          hideLogin();
+          /* update profile header with fresh user info */
+          (window as any).updateProfileHeader?.();
+          resetObjects();
+          resizeCanvas();
+          render();
+          updateScore();
+          showLoginToast();
         }
       })
       .catch((error) => {

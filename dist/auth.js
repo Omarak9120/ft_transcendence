@@ -27,6 +27,7 @@ backToLoginLink.href = "#";
 backToLoginLink.textContent = "Already have an account? Sign in";
 backToLoginLink.className = "hidden";
 sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
+const $ = (sel) => document.querySelector(sel);
 function animateIn(el, cls) {
     el.classList.add("animate__animated", cls);
     el.addEventListener("animationend", () => el.classList.remove("animate__animated", cls), { once: true });
@@ -54,18 +55,12 @@ function hideSignup() {
 function isAuthed() {
     return !!localStorage.getItem('token');
 }
-export function test() {
-    console.log("TESTTTT\n");
+function showLoginToast() {
+    const t = $("#login-toast");
+    console.log(t);
+    t.style.opacity = "1";
+    setTimeout(() => (t.style.opacity = "0"), 2000);
 }
-// export function getAuthHeader(): HeadersInit {
-//   console.log("HERE2\n");
-//   const token = localStorage.getItem('token');
-//   console.log("HERE1 " + token + "\n");
-//   return {
-//     'Content-Type': 'application/json',
-//     'Authorization': token ? `Bearer ${token}` : ''
-//   };
-// }
 function validateEmail(email) {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     return ok ? null : "Please enter a valid email address.";
@@ -103,6 +98,7 @@ form.addEventListener("submit", (e) => {
             body: JSON.stringify({ email, password }),
         })
             .then(async (res) => {
+            var _a, _b;
             const data = await res.json();
             if (!res.ok) {
                 loginError.textContent = data.error || "Login failed.";
@@ -115,6 +111,14 @@ form.addEventListener("submit", (e) => {
                 resizeCanvas();
                 render();
                 updateScore();
+                hideLogin();
+                /* update profile header with fresh user info */
+                (_b = (_a = window).updateProfileHeader) === null || _b === void 0 ? void 0 : _b.call(_a);
+                resetObjects();
+                resizeCanvas();
+                render();
+                updateScore();
+                showLoginToast();
             }
         })
             .catch((error) => {
