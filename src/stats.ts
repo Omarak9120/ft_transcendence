@@ -4,6 +4,8 @@
  */
 
 declare const Chart: any; // Chart.js from CDN
+// import { getAuthHeader } from './auth';
+// import { test } from './auth'
 
 import {
   WinsTotalDTO,
@@ -16,6 +18,8 @@ import {
   LongestHitDTO,
   TrophyDTO,
 } from "./types.js";
+
+// test();
 
 /* toggle mock data */
 const USE_MOCK_DATA = false;
@@ -72,8 +76,26 @@ function last12Labels(d: Date = new Date()): string[] {
   );
 }
 
+function getAuthHeader(): HeadersInit {
+  console.log("HERE2\n");
+  const token = localStorage.getItem('token');
+  console.log("HERE1 " + token + "\n");
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : ''
+  };
+}
+
+// async function fetchJSON<T>(url: string): Promise<T> {
+//   const r = await fetch(url, { credentials: "include" });
+//   if (!r.ok) throw new Error(String(r.status));
+//   return (await r.json()) as T;
+// }
+
 async function fetchJSON<T>(url: string): Promise<T> {
-  const r = await fetch(url, { credentials: "include" });
+  const r = await fetch(url, {
+    headers: getAuthHeader(),
+  });
   if (!r.ok) throw new Error(String(r.status));
   return (await r.json()) as T;
 }

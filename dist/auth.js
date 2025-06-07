@@ -52,8 +52,20 @@ function hideSignup() {
     overlay.classList.remove("hidden");
 }
 function isAuthed() {
-    return !!localStorage.getItem("user");
+    return !!localStorage.getItem('token');
 }
+export function test() {
+    console.log("TESTTTT\n");
+}
+// export function getAuthHeader(): HeadersInit {
+//   console.log("HERE2\n");
+//   const token = localStorage.getItem('token');
+//   console.log("HERE1 " + token + "\n");
+//   return {
+//     'Content-Type': 'application/json',
+//     'Authorization': token ? `Bearer ${token}` : ''
+//   };
+// }
 function validateEmail(email) {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     return ok ? null : "Please enter a valid email address.";
@@ -87,6 +99,7 @@ form.addEventListener("submit", (e) => {
         fetch("http://localhost:3000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ email, password }),
         })
             .then(async (res) => {
@@ -95,7 +108,8 @@ form.addEventListener("submit", (e) => {
                 loginError.textContent = data.error || "Login failed.";
             }
             else {
-                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
                 hideLogin();
                 resetObjects();
                 resizeCanvas();
@@ -103,7 +117,8 @@ form.addEventListener("submit", (e) => {
                 updateScore();
             }
         })
-            .catch(() => {
+            .catch((error) => {
+            console.error('Login error:', error);
             loginError.textContent = "Network error. Please try again.";
         });
     }
@@ -176,11 +191,12 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
     else if (pwErr)
         signupError.textContent = pwErr;
     else if (pw !== pw2)
-        signupError.textContent = "Passwords don’t match.";
+        signupError.textContent = "Passwords don't match.";
     else {
         fetch("http://localhost:3000/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ username: un, email: em, password: pw }),
         })
             .then(async (res) => {
@@ -193,12 +209,14 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
                 loginError.textContent = "Account created! Please sign in.";
             }
         })
-            .catch(() => {
+            .catch((error) => {
+            console.error('Signup error:', error);
             signupError.textContent = "Network error. Please try again.";
         });
     }
 });
 (_d = document.getElementById("nav-signout")) === null || _d === void 0 ? void 0 : _d.addEventListener("click", () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     showLogin();
 });
