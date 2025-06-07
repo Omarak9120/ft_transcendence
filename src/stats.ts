@@ -59,7 +59,6 @@ export function initStatsTab(): void {
   drawGoalsPie();
   drawMonthlyGoalsBars();
   renderStreak();
-  renderLongestHit();
   renderTrophies();
 }
 
@@ -220,32 +219,24 @@ async function drawMonthlyGoalsBars(): Promise<void> {
   });
 }
 
-/* 5) Cards (streak, longest hit, trophies) */
+/* 5) Cards – streak + trophies only */
 function setCardText(sel: string, txt: string): void {
   const el = document.querySelector<HTMLElement>(sel);
   if (el) el.textContent = txt;
 }
 
+/* 5-a  current win-streak */
 async function renderStreak(): Promise<void> {
   const streak = USE_MOCK_DATA
     ? MOCK.streak.streak
     : await fetchJSON<StreakDTO>(ENDPOINT.streak)
         .then((d) => d.streak)
         .catch(() => 0);
+
   setCardText("#streak-card span", String(streak));
 }
 
-async function renderLongestHit(): Promise<void> {
-  const d = USE_MOCK_DATA
-    ? MOCK.longest
-    : await fetchJSON<LongestHitDTO>(ENDPOINT.longest).catch(() => ({
-        longest: 0,
-        opponent: "—",
-      }));
-  setCardText("#longest-hit-card span", String(d.longest));
-  setCardText("#longest-opponent", `vs ${d.opponent}`);
-}
-
+/* 5-b  total trophies */
 async function renderTrophies(): Promise<void> {
   const total = USE_MOCK_DATA
     ? MOCK.trophy.total
@@ -261,3 +252,4 @@ async function renderTrophies(): Promise<void> {
       <p class="text-sm text-white/70">Total trophies</p>
     </div>`;
 }
+

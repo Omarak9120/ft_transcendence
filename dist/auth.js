@@ -78,14 +78,6 @@ form.addEventListener("submit", (e) => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password")
         .value;
-    if (email === "jnde@jnde.jnde" && password === "jnde") {
-        hideLogin();
-        resetObjects();
-        resizeCanvas();
-        render();
-        updateScore();
-        return;
-    }
     const pwErr = validatePassword(password);
     if (!email)
         loginError.textContent = "Email is required.";
