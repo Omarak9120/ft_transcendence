@@ -1,4 +1,4 @@
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e, _f;
 import { resetObjects, resizeCanvas, render, updateScore } from "./main.js";
 const overlay = document.getElementById("login-overlay");
 const appShell = document.getElementById("app");
@@ -8,6 +8,8 @@ const signupOverlay = document.getElementById("signup-overlay");
 const signupForm = document.getElementById("signup-form");
 const signupError = document.getElementById("signup-error");
 let resetMode = false;
+const $ = (sel) => document.querySelector(sel);
+const GOOGLE_LOGIN_URL = 'http://localhost:3000/auth/google';
 const originalSubmit = form.querySelector("button[type='submit'],input[type='submit']");
 const sendCodeBtn = document.createElement("button");
 sendCodeBtn.id = "send-code-btn";
@@ -27,6 +29,27 @@ backToLoginLink.href = "#";
 backToLoginLink.textContent = "Already have an account? Sign in";
 backToLoginLink.className = "hidden";
 sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
+// On page load, check for ?token=… in the URL
+const params = new URLSearchParams(window.location.search);
+const googleToken = params.get('token');
+if (googleToken) {
+    localStorage.setItem('token', googleToken);
+    // optionally fetch user profile from /users/me
+    fetch('http://localhost:3000/api/users/me', {
+        headers: { 'Authorization': `Bearer ${googleToken}` }
+    })
+        .then((r) => r.json())
+        .then((user) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        // clean up the URL
+        window.history.replaceState({}, '', window.location.pathname);
+        hideLogin();
+        resetObjects();
+        resizeCanvas();
+        render();
+        updateScore();
+    });
+}
 function animateIn(el, cls) {
     el.classList.add("animate__animated", cls);
     el.addEventListener("animationend", () => el.classList.remove("animate__animated", cls), { once: true });
@@ -159,6 +182,13 @@ sendCodeBtn.addEventListener("click", () => {
     e.preventDefault();
     hideSignup();
 });
+//Google OAuth
+(_d = $('#google-login-btn')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
+    window.location.href = GOOGLE_LOGIN_URL;
+});
+(_e = $('#google-signup-btn')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', () => {
+    window.location.href = GOOGLE_LOGIN_URL;
+});
 signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListener("submit", (e) => {
     e.preventDefault();
     signupError.textContent = "";
@@ -198,7 +228,7 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
         });
     }
 });
-(_d = document.getElementById("nav-signout")) === null || _d === void 0 ? void 0 : _d.addEventListener("click", () => {
+(_f = document.getElementById("nav-signout")) === null || _f === void 0 ? void 0 : _f.addEventListener("click", () => {
     localStorage.removeItem("user");
     showLogin();
 });

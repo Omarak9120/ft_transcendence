@@ -60,8 +60,10 @@ function refreshProfileHeader(): void {
     const user = JSON.parse(localStorage.getItem("user") ?? "{}");
     const nameEl = document.getElementById("profile-name");
     const mailEl = document.getElementById("profile-mail");
+	const avatar = $("#avatar-img")   as HTMLInputElement;
     if (nameEl && user.username) nameEl.textContent = user.username;
     if (mailEl && user.email   ) mailEl.textContent = user.email;
+	if (avatar && user.avatar_url) avatar.src = user.avatar_url;
   } catch { /* ignore */ }
 }
 
@@ -169,6 +171,13 @@ saveBtn?.addEventListener("click", () => {
   showToast();
   refreshProfileHeader();
 });
+
+// Refresh profile info on click
+const profileBtn = $("#nav-profile") as HTMLInputElement | null;
+profileBtn?.addEventListener("click", () => {
+	refreshProfileHeader();
+});
+
 
 /* initial hydrate once ------------------------------------------- */
 populateProfileViews();
