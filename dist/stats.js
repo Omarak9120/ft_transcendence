@@ -2,6 +2,7 @@
  * stats.ts – all graphs & cards in the Stats tab
  * Strict-mode TypeScript
  */
+// test();
 /* toggle mock data */
 const USE_MOCK_DATA = false;
 /* base URL */
@@ -46,8 +47,24 @@ export function initStatsTab() {
 function last12Labels(d = new Date()) {
     return Array.from({ length: 12 }, (_, i) => new Date(d.getFullYear(), d.getMonth() - 11 + i, 1).toLocaleString("en-US", { month: "short", year: "numeric" }));
 }
+function getAuthHeader() {
+    console.log("HERE2\n");
+    const token = localStorage.getItem('token');
+    console.log("HERE1 " + token + "\n");
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+    };
+}
+// async function fetchJSON<T>(url: string): Promise<T> {
+//   const r = await fetch(url, { credentials: "include" });
+//   if (!r.ok) throw new Error(String(r.status));
+//   return (await r.json()) as T;
+// }
 async function fetchJSON(url) {
-    const r = await fetch(url, { credentials: "include" });
+    const r = await fetch(url, {
+        headers: getAuthHeader(),
+    });
     if (!r.ok)
         throw new Error(String(r.status));
     return (await r.json());

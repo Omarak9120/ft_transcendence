@@ -18,6 +18,16 @@ const ENDPOINT = `${API_BASE}/api/matches/history`;
 /* One-time guard */
 let loaded = false;
 
+function getAuthHeader(): HeadersInit {
+  console.log("HERE2\n");
+  const token = localStorage.getItem('token');
+  console.log("HERE1 " + token + "\n");
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : ''
+  };
+}
+
 /* Called from nav.ts when the History tab is opened */
 export async function initHistoryTab(): Promise<void> {
   if (loaded) return;
@@ -25,7 +35,7 @@ export async function initHistoryTab(): Promise<void> {
 
   try {
     /* 1) Fetch + parse */
-    const r = await fetch(ENDPOINT, { credentials: "include" });
+    const r = await fetch(ENDPOINT, { headers: getAuthHeader() });
     if (!r.ok) throw new Error(String(r.status));
     const rows = (await r.json()) as MatchRow[];
 

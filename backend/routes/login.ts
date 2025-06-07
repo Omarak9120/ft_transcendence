@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import db from '../utils/db';
 import { verifyPassword } from '../utils/hash';
+import { generateToken } from '../utils/jwt';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
   fastify.post('/login', async (req, reply) => {
@@ -25,8 +26,15 @@ export default async function loginRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: 'Invalid email or password' });
     }
 
+    const token = generateToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email
+    });
+	fastify.log.info({ token }, 'Generated JWT for user')
     return reply.send({
       message: 'Login successful',
+      token,
       user: {
         id: user.id,
         username: user.username,
