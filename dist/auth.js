@@ -27,7 +27,6 @@ backToLoginLink.href = "#";
 backToLoginLink.textContent = "Already have an account? Sign in";
 backToLoginLink.className = "hidden";
 sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
-const $ = (sel) => document.querySelector(sel);
 function animateIn(el, cls) {
     el.classList.add("animate__animated", cls);
     el.addEventListener("animationend", () => el.classList.remove("animate__animated", cls), { once: true });
@@ -53,13 +52,7 @@ function hideSignup() {
     overlay.classList.remove("hidden");
 }
 function isAuthed() {
-    return !!localStorage.getItem('token');
-}
-function showLoginToast() {
-    const t = $("#login-toast");
-    console.log(t);
-    t.style.opacity = "1";
-    setTimeout(() => (t.style.opacity = "0"), 2000);
+    return !!localStorage.getItem("user");
 }
 function validateEmail(email) {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -94,35 +87,23 @@ form.addEventListener("submit", (e) => {
         fetch("http://localhost:3000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: "include",
             body: JSON.stringify({ email, password }),
         })
             .then(async (res) => {
-            var _a, _b;
             const data = await res.json();
             if (!res.ok) {
                 loginError.textContent = data.error || "Login failed.";
             }
             else {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem("user", JSON.stringify(data.user));
                 hideLogin();
                 resetObjects();
                 resizeCanvas();
                 render();
                 updateScore();
-                hideLogin();
-                /* update profile header with fresh user info */
-                (_b = (_a = window).updateProfileHeader) === null || _b === void 0 ? void 0 : _b.call(_a);
-                resetObjects();
-                resizeCanvas();
-                render();
-                updateScore();
-                showLoginToast();
             }
         })
-            .catch((error) => {
-            console.error('Login error:', error);
+            .catch(() => {
             loginError.textContent = "Network error. Please try again.";
         });
     }
@@ -195,12 +176,11 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
     else if (pwErr)
         signupError.textContent = pwErr;
     else if (pw !== pw2)
-        signupError.textContent = "Passwords don't match.";
+        signupError.textContent = "Passwords don’t match.";
     else {
         fetch("http://localhost:3000/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: "include",
             body: JSON.stringify({ username: un, email: em, password: pw }),
         })
             .then(async (res) => {
@@ -213,14 +193,12 @@ signupForm === null || signupForm === void 0 ? void 0 : signupForm.addEventListe
                 loginError.textContent = "Account created! Please sign in.";
             }
         })
-            .catch((error) => {
-            console.error('Signup error:', error);
+            .catch(() => {
             signupError.textContent = "Network error. Please try again.";
         });
     }
 });
 (_d = document.getElementById("nav-signout")) === null || _d === void 0 ? void 0 : _d.addEventListener("click", () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     showLogin();
 });
