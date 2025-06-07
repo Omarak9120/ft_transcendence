@@ -13,7 +13,6 @@ const ENDPOINT = {
     winsTotal: `${API_BASE}/api/stats/wins`,
     goalsTotal: `${API_BASE}/api/stats/goals`,
     goalsMonth: `${API_BASE}/api/stats/monthly-goals`,
-    streak: `${API_BASE}/api/stats/win-streak`,
     longest: `${API_BASE}/api/stats/longest-hit`,
     trophy: `${API_BASE}/api/users/me/trophies`,
 };
@@ -26,7 +25,6 @@ const MOCK = {
         scored: [10, 9, 8, 12, 11, 10, 13, 12, 9, 8, 15, 13],
         conceded: [7, 8, 6, 9, 8, 7, 9, 10, 7, 6, 11, 10],
     },
-    streak: { streak: 7 },
     longest: { longest: 37, opponent: "Karim" },
     trophy: { total: 420 },
 };
@@ -40,7 +38,6 @@ export function initStatsTab() {
     drawLifePie();
     drawGoalsPie();
     drawMonthlyGoalsBars();
-    renderStreak();
     renderTrophies();
 }
 /* ───── helpers ───── */
@@ -48,9 +45,7 @@ function last12Labels(d = new Date()) {
     return Array.from({ length: 12 }, (_, i) => new Date(d.getFullYear(), d.getMonth() - 11 + i, 1).toLocaleString("en-US", { month: "short", year: "numeric" }));
 }
 function getAuthHeader() {
-    console.log("HERE2\n");
     const token = localStorage.getItem('token');
-    console.log("HERE1 " + token + "\n");
     return {
         'Content-Type': 'application/json',
         'Authorization': token ? `Bearer ${token}` : ''
@@ -201,21 +196,20 @@ async function drawMonthlyGoalsBars() {
         },
     });
 }
-/* 5) Cards – streak + trophies only */
-function setCardText(sel, txt) {
-    const el = document.querySelector(sel);
-    if (el)
-        el.textContent = txt;
-}
+// /* 5) Cards – streak + trophies only */
+// function setCardText(sel: string, txt: string): void {
+//   const el = document.querySelector<HTMLElement>(sel);
+//   if (el) el.textContent = txt;
+// }
 /* 5-a  current win-streak */
-async function renderStreak() {
-    const streak = USE_MOCK_DATA
-        ? MOCK.streak.streak
-        : await fetchJSON(ENDPOINT.streak)
-            .then((d) => d.streak)
-            .catch(() => 0);
-    setCardText("#streak-card span", String(streak));
-}
+// async function renderStreak(): Promise<void> {
+//   const streak = USE_MOCK_DATA
+//     ? MOCK.streak.streak
+//     : await fetchJSON<StreakDTO>(ENDPOINT.streak)
+//         .then((d) => d.streak)
+//         .catch(() => 0);
+//   setCardText("#streak-card span", String(streak));
+// }
 /* 5-b  total trophies */
 async function renderTrophies() {
     const total = USE_MOCK_DATA
