@@ -64,10 +64,13 @@ function refreshProfileHeader() {
         const user = JSON.parse((_a = localStorage.getItem("user")) !== null && _a !== void 0 ? _a : "{}");
         const nameEl = document.getElementById("profile-name");
         const mailEl = document.getElementById("profile-mail");
+        const avatar = $("#avatar-img");
         if (nameEl && user.username)
             nameEl.textContent = user.username;
         if (mailEl && user.email)
             mailEl.textContent = user.email;
+        if (avatar && user.avatar_url)
+            avatar.src = user.avatar_url;
     }
     catch ( /* ignore */_b) { /* ignore */ }
 }
@@ -176,6 +179,11 @@ saveBtn === null || saveBtn === void 0 ? void 0 : saveBtn.addEventListener("clic
         viewEmail.textContent = e;
     toggleEdit(false);
     showToast();
+    refreshProfileHeader();
+});
+// Refresh profile info on click
+const profileBtn = $("#nav-profile");
+profileBtn === null || profileBtn === void 0 ? void 0 : profileBtn.addEventListener("click", () => {
     refreshProfileHeader();
 });
 /* initial hydrate once ------------------------------------------- */

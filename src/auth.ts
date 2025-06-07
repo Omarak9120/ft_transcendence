@@ -11,6 +11,11 @@ const signupError = document.getElementById("signup-error") as HTMLElement;
 
 let resetMode = false;
 
+const $ = <T extends HTMLElement = HTMLElement>(sel: string) =>
+  document.querySelector<T>(sel);
+
+const GOOGLE_LOGIN_URL = 'http://localhost:3000/auth/google';
+
 const originalSubmit = form.querySelector(
   "button[type='submit'],input[type='submit']"
 ) as HTMLElement | null;
@@ -33,6 +38,28 @@ backToLoginLink.href = "#";
 backToLoginLink.textContent = "Already have an account? Sign in";
 backToLoginLink.className = "hidden";
 sendCodeBtn.insertAdjacentElement("afterend", backToLoginLink);
+
+// On page load, check for ?token=… in the URL
+const params = new URLSearchParams(window.location.search);
+const googleToken = params.get('token');
+if (googleToken) {
+  localStorage.setItem('token', googleToken);
+  // optionally fetch user profile from /users/me
+  fetch('http://localhost:3000/api/users/me', {
+    headers: { 'Authorization': `Bearer ${googleToken}` }
+  })
+    .then((r) => r.json())
+    .then((user) => {
+      localStorage.setItem('user', JSON.stringify(user));
+      // clean up the URL
+      window.history.replaceState({}, '', window.location.pathname);
+	  hideLogin();
+      resetObjects();
+      resizeCanvas();
+      render();
+      updateScore();
+    });
+}
 
 function animateIn(el: HTMLElement, cls: string) {
   el.classList.add("animate__animated", cls);
@@ -182,6 +209,15 @@ document.getElementById("show-login")?.addEventListener("click", (e) => {
   e.preventDefault();
   hideSignup();
 });
+
+//Google OAuth
+$('#google-login-btn')?.addEventListener('click', () => {
+  window.location.href = GOOGLE_LOGIN_URL;
+});
+$('#google-signup-btn')?.addEventListener('click', () => {
+  window.location.href = GOOGLE_LOGIN_URL;
+});
+
 
 signupForm?.addEventListener("submit", (e) => {
   e.preventDefault();
