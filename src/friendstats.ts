@@ -1,4 +1,4 @@
-	/* friendstats.ts – standalone overlay showing a friend’s stats           */
+	/* friendstats.ts – standalone overlay showing a friend's stats           */
 	/* ===================================================================== */
 	import { HOST } from "./config.js";
 	declare const Chart: any;
@@ -63,10 +63,10 @@
 		type:"bar",
 		data:{ labels,
 			datasets:[{ label:"Win %", data,
-						backgroundColor:"rgba(252,211,77,0.9)", borderRadius:4 }]},
+						backgroundColor:"#EBCB8B", borderRadius:4 }]},
 		options:{ plugins:{ legend:{ display:false } },
-				scales:{ y:{ beginAtZero:true, ticks:{ color:"#fff"} },
-						x:{ ticks:{ color:"#fff"} } } },
+				scales:{ y:{ beginAtZero:true, ticks:{ color:"#D8DEE9"} },
+						x:{ ticks:{ color:"#D8DEE9"} } } },
 	});
 	}
 
@@ -78,8 +78,8 @@
 		type:"pie",
 		data:{ labels:["Wins","Losses"],
 			datasets:[{ data:[wins,losses],
-						backgroundColor:["#4ade80","#f87171"] }]},
-		options:{ plugins:{ legend:{ labels:{ color:"#fff", boxWidth:10 } } } },
+						backgroundColor:["#A3BE8C","#BF616A"] }]},
+		options:{ plugins:{ legend:{ labels:{ color:"#D8DEE9", boxWidth:10 } } } },
 	});
 	}
 
@@ -91,8 +91,8 @@
 		type:"pie",
 		data:{ labels:["Scored","Conceded"],
 			datasets:[{ data:[scored,conceded],
-						backgroundColor:["#38bdf8","#f87171"] }]},
-		options:{ plugins:{ legend:{ labels:{ color:"#fff", boxWidth:10 } } } },
+						backgroundColor:["#88C0D0","#B48EAD"] }]},
+		options:{ plugins:{ legend:{ labels:{ color:"#D8DEE9", boxWidth:10 } } } },
 	});
 	}
 
@@ -108,13 +108,13 @@
 		data:{ labels,
 			datasets:[
 				{ label:"Scored",   data:labels.map(l=>s[l.slice(0,3)]??0),
-				backgroundColor:"rgba(34,211,238,0.9)", borderRadius:4 },
+				backgroundColor:"#A3BE8C", borderRadius:4 },
 				{ label:"Conceded", data:labels.map(l=>c[l.slice(0,3)]??0),
-				backgroundColor:"rgba(248,113,113,0.9)", borderRadius:4 },
+				backgroundColor:"#BF616A", borderRadius:4 },
 			]},
-		options:{ plugins:{ legend:{ labels:{ color:"#fff"} } },
-				scales:{ y:{ beginAtZero:true, ticks:{ color:"#fff"} },
-						x:{ ticks:{ color:"#fff"} } } },
+		options:{ plugins:{ legend:{ labels:{ color:"#D8DEE9"} } },
+				scales:{ y:{ beginAtZero:true, ticks:{ color:"#D8DEE9"} },
+						x:{ ticks:{ color:"#D8DEE9"} } } },
 	});
 	}
 

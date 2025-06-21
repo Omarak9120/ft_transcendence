@@ -33,10 +33,10 @@ const PadGap = 24;
 
 let ignoreServerState = false;
 
-const ColLPad = "#22d3ee";
-const ColRPad = "#fbbf24";
-const ColBall = "#f472b6";
-const ColLine = "#f3f4f6";
+const ColLPad = "#88C0D0"; // nord10
+const ColRPad = "#B48EAD"; // nord13
+const ColBall = "#A3BE8C"; // nord14
+const ColLine = "#D8DEE9"; // nord4
 
 const TimeToIncSpeed = 12; // seconds until speed increases
 const IncRate = 0.1; // increment per second after the above
@@ -469,88 +469,78 @@ function handleWin(remote: boolean): void {
         style.id = "win-style";
         style.textContent = `
 		#win-message.overlay{
-			position:absolute;
-			inset:0;
+			position: fixed;
+			inset: 0;
+			background:rgba(0,0,0,.7);
+			z-index: 50;
 			display:flex;
-			align-items:center;
-			justify-content:center;
-			pointer-events:auto;
-			backdrop-filter:blur(4px);
+			align-items: center;
+			justify-content: center;
 		}
 		#win-message .msg-box{
-			display:flex;
-			flex-direction:column;
-			align-items:center;
-			gap:1rem;
-			background:linear-gradient(145deg,rgba(34,211,238,.25),rgba(251,191,36,.25));
-			border:3px solid #fff;
-			padding:2rem 2.5rem;
-			border-radius:14px;
-			box-shadow:0 0 25px rgba(255,255,255,.06),0 0 8px rgba(0,0,0,.4) inset;
-			text-align:center;
+			--animate-duration: 0.5s;
+			text-align: center;
+			padding: 2rem;
+			border-radius:1.5rem;
+			background:linear-gradient(145deg,rgba(136, 192, 208, 0.25),rgba(180, 142, 173, 0.25)); /* nord10, nord13 */
+			border:3px solid #D8DEE9; /* nord4 */
+			box-shadow:0 0 32px rgba(0,0,0,.5);
 		}
 		#win-message .winner{
-			font-size:1.5rem;
-			font-weight:800;
-			color:#fff;
-			text-shadow:0 0 8px #fff;
+			font-size:3.5rem;
+			font-weight: 800; /* extrabold */
+			color:#E5E9F0; /* nord5 */
+			text-shadow:0 0 8px #D8DEE9; /* nord4 */
 		}
 		#play-again{
-			margin-top:1rem;
-			padding:.55rem 2rem;
-			font-size:1.1rem;
-			font-weight:700;
-			border:none;
-			border-radius:10px;
-			background:#f472b6;
-			color:#fff;
+			font-size:1.125rem; /* text-lg */
+			font-weight: 600; /* semibold */
+			border:0;
+			border-radius:99px;
+			padding: 0.5rem 1.5rem;
+			margin-top:1.5rem;
 			cursor:pointer;
-			transition:transform .2s,filter .2s;
+			background:#A3BE8C; /* nord14 */
+			color:#2E3440; /* nord0 */
+			transition: all .2s;
 		}
 		#play-again:hover{
 			transform:scale(1.05);
-			filter:brightness(1.15);
+			box-shadow:0 0 16px rgba(163,190,140,.5); /* nord14 with alpha */
 		}
 
-		/* Desktop refinements */
-		@media (min-width:640px){
+		/* responsive */
+		@media(max-width:640px){
 			#win-message .msg-box{
-			flex-direction:row;
-			gap:2rem;
+				padding:1.5rem 1rem;
+				border-width:2px;
 			}
 			#win-message .winner{ font-size:3rem; }
 			#play-again{
-			margin-top:0;
-			padding:.6rem 2.5rem;
-			font-size:1.25rem;
+				font-size:1rem;
+				padding:0.5rem 1.25rem;
+			}
+			#win-message .btn-row{
+				flex-direction: column;
+				gap:0.5rem;
 			}
 		}
-        #win-message .btn-row{
-              display:flex;
-              gap:1rem;
-              flex-wrap:wrap;
-              justify-content:center;
-            }
-                
-            /* CLOSE / HOME button 🎨 */
-            #close-btn{
-              margin-top:1rem;
-              padding:.55rem 2rem;
-              font-size:1.1rem;
-              font-weight:700;
-              border:none;
-              border-radius:10px;
-              background:#facc15;           /* sunny amber, contrasts play-again pink */
-              color:#000;
-              cursor:pointer;
-              transition:transform .2s,filter .2s;
-            }
-            #close-btn:hover{
-              transform:scale(1.05);
-              filter:brightness(1.15);
-            }
-              
-		`;
+		#close-btn{
+			font-size:1rem;
+			font-weight: 600;
+			border:0;
+			border-radius:99px;
+			padding: 0.5rem 1.25rem;
+			cursor:pointer;
+			background:#EBCB8B;           /* nord15, contrasts nord14 */
+			color:#2E3440; /* nord0 */
+			transition: all .2s;
+		}
+		#close-btn:hover{
+			transform:scale(1.05);
+			box-shadow:0 0 16px rgba(235,203,139,.5); /* nord15 with alpha */
+		}
+        `;
         document.head.appendChild(style);
     }
 

@@ -55,7 +55,7 @@ function zap(id: string): void {
 }
 
 export function initStatsTab(): void {
-  /* wipe previous charts (if any) to avoid “canvas already in use” errors */
+  /* wipe previous charts (if any) to avoid "canvas already in use" errors */
   ["monthly-chart","life-chart","goals-chart","hits-chart"].forEach(zap);
 
   /* re-fetch and re-draw every time */
@@ -118,15 +118,15 @@ async function drawMonthlyWins(): Promise<void> {
         {
           label: "Win rate (%)",
           data,
-          backgroundColor: "rgba(252,211,77,0.9)",
+          backgroundColor: "#EBCB8B",
         },
       ],
     },
     options: {
       plugins: { legend: { display: false } },
       scales: {
-        y: { beginAtZero: true, ticks: { color: "#fff" } },
-        x: { ticks: { color: "#fff" } },
+        y: { beginAtZero: true, ticks: { color: "#D8DEE9" } },
+        x: { ticks: { color: "#D8DEE9" } },
       },
     },
   });
@@ -149,12 +149,12 @@ async function drawLifePie(): Promise<void> {
       datasets: [
         {
           data: [t.wins, t.losses],
-          backgroundColor: ["#4ade80", "#f87171"],
+          backgroundColor: ["#A3BE8C", "#BF616A"],
         },
       ],
     },
     options: {
-      plugins: { legend: { labels: { color: "#fff", boxWidth: 10 } } },
+      plugins: { legend: { labels: { color: "#D8DEE9", boxWidth: 10 } } },
     },
   });
 }
@@ -176,12 +176,12 @@ async function drawGoalsPie(): Promise<void> {
       datasets: [
         {
           data: [g.scored, g.conceded],
-          backgroundColor: ["#38bdf8", "#f87171"],
+          backgroundColor: ["#88C0D0", "#B48EAD"],
         },
       ],
     },
     options: {
-      plugins: { legend: { labels: { color: "#fff", boxWidth: 10 } } },
+      plugins: { legend: { labels: { color: "#D8DEE9", boxWidth: 10 } } },
     },
   });
 }
@@ -219,20 +219,20 @@ async function drawMonthlyGoalsBars(): Promise<void> {
         {
           label: "Scored",
           data: scored,
-          backgroundColor: "rgba(34,211,238,0.9)",
+          backgroundColor: "#A3BE8C",
         },
         {
           label: "Conceded",
           data: conceded,
-          backgroundColor: "rgba(248,113,113,0.9)",
+          backgroundColor: "#BF616A",
         },
       ],
     },
     options: {
-      plugins: { legend: { labels: { color: "#fff" } } },
+      plugins: { legend: { labels: { color: "#D8DEE9" } } },
       scales: {
-        y: { beginAtZero: true, ticks: { color: "#fff" } },
-        x: { ticks: { color: "#fff" } },
+        y: { beginAtZero: true, ticks: { color: "#D8DEE9" } },
+        x: { ticks: { color: "#D8DEE9" } },
       },
     },
   });
