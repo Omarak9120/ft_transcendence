@@ -6,9 +6,9 @@ import { HOST }                             from './config.js';
 import {
   enableRemoteMode,
   setGameId,
-  connectWebSocket
+  connectWebSocket,
+  set_side
 } from './main.js';
-
 export { showOverlay, hideOverlay };
 
 /* cache DOM -----------------------------------------------------------*/
@@ -109,18 +109,38 @@ document.getElementById('tour-create-btn')?.addEventListener('click', async () =
 });
 
 /*──────────────────────────────────────────────────────────────*
- *  SHARE-CODE copy helper  (NEW)
+ *  SHARE-CODE copy helper  (robust with fallback)
  *──────────────────────────────────────────────────────────────*/
-document.getElementById('tour-copy-code')?.addEventListener('click', () => {
-  if (!code) return;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('tour-copy-code') as HTMLButtonElement;
-    if (!btn) return;
-    const old = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(() => (btn.textContent = old), 1500);
-  });
+const copyBtn = document.getElementById('tour-copy-code') as HTMLButtonElement | null;
+
+function flashCopied(btn: HTMLButtonElement) {
+  const saved = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => (btn.textContent = saved), 1500);
+}
+
+copyBtn?.addEventListener('click', () => {
+  if (!code) return;                                  // nothing to copy
+
+  // Modern Clipboard API – works only on secure origins (HTTPS or localhost)
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard
+      .writeText(code)
+      .then(() => copyBtn && flashCopied(copyBtn))
+      .catch(err => alert(`Clipboard error: ${err.message}`));
+    return;
+  }
+
+  // Fallback for plain HTTP or very old browsers
+  const tmp = document.createElement('input');
+  tmp.value = code;
+  document.body.appendChild(tmp);
+  tmp.select();
+  document.execCommand('copy');
+  document.body.removeChild(tmp);
+  if (copyBtn) flashCopied(copyBtn);
 });
+
 
 
 
@@ -192,6 +212,7 @@ function connectWs() {
         ov.style.zIndex        = '0';
         ov.style.pointerEvents = 'none';         
         ov.style.background    = 'transparent';
+        set_side(msg.players[0] === me ? "left" : "right");
 
 
         showGameBackdrop();

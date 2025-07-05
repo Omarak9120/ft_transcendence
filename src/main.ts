@@ -102,18 +102,18 @@ async function showPlayerBadges(selfId: number, oppId: number) {
     const [me, opp] = await Promise.all([fetchUser(selfId), fetchUser(oppId)]);
 
     /* side-assignment block you already added — unchanged */
-    const selfOnLeft = !!ownGameId;
+    const selfOnLeft = mySide === "left";      // ✨ CHANGED
 
     if (selfOnLeft) {
-      avatarLeft .src       = resolveAvatar(me.avatar_url);
-      avatarRight.src       = resolveAvatar(opp.avatar_url);
-      nameLeft .textContent = me .username;
-      nameRight.textContent = opp.username;
+        avatarLeft .src       = resolveAvatar(me .avatar_url);
+        avatarRight.src       = resolveAvatar(opp.avatar_url);
+        nameLeft .textContent = me .username;
+        nameRight.textContent = opp.username;
     } else {
-      avatarLeft .src       = resolveAvatar(opp.avatar_url);
-      avatarRight.src       = resolveAvatar(me .avatar_url);
-      nameLeft .textContent = opp.username;
-      nameRight.textContent = me .username;
+        avatarLeft .src       = resolveAvatar(opp.avatar_url);
+        avatarRight.src       = resolveAvatar(me .avatar_url);
+        nameLeft .textContent = opp.username;
+        nameRight.textContent = me .username;
     }
 
     [badgeLeft, badgeRight].forEach(b => (b.style.opacity = "1"));
@@ -660,7 +660,11 @@ function beginPlay(): void {
 let opponentId: number | null = null;
 let currentMatchId: number | null = null;
 let yourUserId: number | null = null;
+let mySide: "left" | "right" | null = null;
 
+export function set_side(side: "left" | "right") {   //  ← NEW (lower-case name)
+  mySide = side;
+}
 // let isCreator   = false;
 // let isJoiner   = false;
 
@@ -768,6 +772,7 @@ function cleanupRemote() {
     document.body.classList.remove("game-playing");
     remoteMode = false;
 	hasJoined   = false;
+    mySide     = null;
     // isCreator   = false;
     // isJoiner = false;
     // remove any waiting/countdown overlays left behind
