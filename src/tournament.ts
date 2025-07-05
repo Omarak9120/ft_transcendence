@@ -74,7 +74,7 @@ document.getElementById('tour-create-btn')?.addEventListener('click', async () =
 /*──────────────────────────────────────────────────────────────*
  *  JOIN  (other players)
  *──────────────────────────────────────────────────────────────*/
-document.getElementById('tour-join-btn')?.addEventListener('click', async () => {
+document.getElementById('tour-confirm-join-btn')?.addEventListener('click', async () => {
   try {
     const input = document.getElementById('tour-code-input') as HTMLInputElement;
     code = input.value.trim().toUpperCase();
