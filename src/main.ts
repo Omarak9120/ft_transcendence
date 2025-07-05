@@ -824,6 +824,10 @@ export function connectWebSocket() {
             alert("WTF MAN :D");
         }
         if (msg.type === "ready") {
+             if (mySide === null) {
+                // If we were the one who POST /api/game, ownGameId === gameId
+                set_side(ownGameId && gameId === ownGameId ? "left" : "right");
+            }
             opponentId = msg.opponentId;
             showPlayerBadges(yourUserId!, opponentId);
             // const token = localStorage.getItem("token");
@@ -1122,6 +1126,8 @@ export function initRemoteModal(): void {
         const data = (await res.json()) as { gameId: string };
         gameId = data.gameId;
         remoteMode = true;
+        ownGameId  = gameId;
+        set_side("left");
         // isCreator = true;
         // modal.classList.add('hidden');
         connectWebSocket();
@@ -1159,16 +1165,8 @@ export function initRemoteModal(): void {
         // if (!id) return alert("Please enter a Game ID");
         gameId = id;
         remoteMode = true;
-        ownGameId = null;function showHome(): void {
-  // unhide the main dashboard / landing section
-  document.getElementById('home-screen')?.classList.remove('hidden');
-
-  // make sure other major sections are hidden
-  document.getElementById('game-screen')?.classList.add('hidden');
-
-  // extra clean-up if you have side panels etc.
-  document.body.classList.remove('game-playing');
-}
+        ownGameId  = null;
+        set_side("right");
 
         // hideOverlay(ov, inner);
         connectWebSocket();
