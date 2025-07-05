@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Sign Up</title>
+  </head>
+  <body>
+    <script>
+      // Wait for DOM to be ready
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM loaded");
+
+        // Test if elements exist
+        const signupBtn = document.getElementById("show-signup");
+        const loginOverlay = document.getElementById("login-overlay");
+        const signupOverlay = document.getElementById("signup-overlay");
+
+        console.log("Sign up button:", signupBtn);
+        console.log("Login overlay:", loginOverlay);
+        console.log("Signup overlay:", signupOverlay);
+
+        if (signupBtn) {
+          signupBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            console.log("Sign up button clicked!");
+
+            if (signupOverlay) {
+              signupOverlay.classList.remove("hidden");
+              console.log("Signup overlay shown");
+            }
+            if (loginOverlay) {
+              loginOverlay.classList.add("hidden");
+              console.log("Login overlay hidden");
+            }
+          });
+        }
+      });
+    </script>
+    <p>
+      This is a test page to check if the sign-up functionality works properly.
+    </p>
+  </body>
+</html>
